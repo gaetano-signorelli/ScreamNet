@@ -1,0 +1,8 @@
+#Preprocessing
+SAMPLING_RATE = 22050 # 8192
+WINDOW_SIZE = 1024
+HOP_LENGTH = 256 # 768
+N_FRAMES = 128 # 25
+TRANSFORM_METHOD = "mel" #One between "mel", "mfcc" and "stft"
+TOP_DECIBEL = 60
+ACCEPTABLE_RATE = 0.05

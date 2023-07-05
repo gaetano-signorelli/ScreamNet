@@ -1,8 +1,19 @@
+import os
+
 #Preprocessing
 SAMPLING_RATE = 22050 # 8192
 WINDOW_SIZE = 1024
 HOP_LENGTH = 256 # 768
-N_FRAMES = 128 # 25
+N_FRAMES = 32 # 25
 TRANSFORM_METHOD = "mel" #One between "mel", "mfcc" and "stft"
 TOP_DECIBEL = 60
 ACCEPTABLE_RATE = 0.05
+
+#Classification training
+CLASSIFICATION_RUN_EAGERLY = True #False
+CLASSIFICATION_LEARNING_RATE = 1e-3
+CLASSIFICATION_EPOCHS = 30
+CLASSIFICATION_BATCH_SIZE = 64
+CLASSIFICATION_VALIDATION_SPLIT = 0.1
+CLASSIFICATION_TRAIN_PATH = os.path.join("data","Dataset")
+CLASSIFICATION_WEIGHTS_PATH = os.path.join("weights","classifier","weights.ckpt")

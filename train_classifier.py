@@ -15,6 +15,7 @@ from src.config import *
 
 SAVE_WEIGHTS = True
 LOAD_WEIGHTS = False
+RANDOM_SEED = 24
 
 def load_dataset_class(root, class_value):
 
@@ -42,11 +43,17 @@ def load_dataset():
     x = np.array(sings + whisps + screams)
     y = np.array(sings_labels + whisps_labels + scream_labels)
 
+    if CLASSIFICATION_NORMALIZE:
+        max_val = np.max(x)
+        x = x / max_val
+
     print("{} samples in the dataset".format(len(x)))
 
     return x, y
 
 if __name__ == '__main__':
+
+    tf.keras.utils.set_random_seed(RANDOM_SEED)
 
     input_shape = (128, N_FRAMES, 1)
     warmup_input = Input(shape=input_shape)
@@ -81,7 +88,7 @@ if __name__ == '__main__':
                         callbacks=[early_stopping],
                         validation_split=CLASSIFICATION_VALIDATION_SPLIT,
                         shuffle=True,
-                        class_weight=None)
+                        class_weight={0:1.0, 1:1.8})
 
     if SAVE_WEIGHTS:
         model.save_weights(CLASSIFICATION_WEIGHTS_PATH)

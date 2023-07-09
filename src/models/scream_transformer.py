@@ -128,6 +128,9 @@ class ScreamTransformer(Model):
         self.encoder = ScreamEncoder()
         self.decoder = ScreamDecoder()
 
+        self.flatten_layer = layers.Flatten()
+        self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
+
         self.total_loss_tracker = metrics.Mean(name="loss")
         self.scream_loss_tracker = metrics.Mean(name="scream")
         self.correlation_loss_tracker = metrics.Mean(name="correlation")
@@ -141,7 +144,15 @@ class ScreamTransformer(Model):
 
     @tf.function
     def correlation_loss(self, input, output):
-        pass
+
+        embedding_input = self.flatten_layer(input)
+        embedding_output = self.flatten_layer(output)
+
+        correlation = self.cosine_similarity([embedding_input, embedding_output])
+
+        norm_correlation =  (2.0 - (correlation + 1.0)) / 2.0
+
+        return norm_correlation
 
     @tf.function
     def call(self, x, training=False):
@@ -150,8 +161,8 @@ class ScreamTransformer(Model):
         decoded_x = self.decoder(encoded_x)
 
         if training:
-            loss_scream = scream_loss(decoded_x)
-            loss_corr = correlation_loss(decoded_x)
+            loss_scream = self.scream_loss(decoded_x)
+            loss_corr = self.correlation_loss(x, decoded_x)
 
             return decoded_x, loss_scream, loss_corr
 
@@ -177,8 +188,8 @@ class ScreamTransformer(Model):
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
 
         self.total_loss_tracker.update_state(loss)
-        self.scream_loss_tracker.update_state(tf.math.reduce_mean(scream_loss))
-        self.correlation_loss_tracker.update_state(tf.math.reduce_mean(correlation_loss))
+        self.scream_loss_tracker.update_state(tf.math.reduce_mean(loss_scream))
+        self.correlation_loss_tracker.update_state(tf.math.reduce_mean(loss_corr))
 
         return {
             "loss": self.total_loss_tracker.result(),

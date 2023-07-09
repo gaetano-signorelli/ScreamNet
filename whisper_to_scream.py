@@ -9,7 +9,7 @@ from src.models.scream_transformer import ScreamTransformer
 
 from src.config import *
 
-PATH = os.path.join("data","Whispers","2 lug, 18.20ÔÇï.mp3")
+PATH = os.path.join("data","Whispers","2 lug, 18.2ÔÇï.mp3")
 RESULT_PATH = os.path.join(RESULTS_PATH, "test.mp3")
 
 if __name__ == '__main__':

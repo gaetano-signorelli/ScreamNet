@@ -76,7 +76,7 @@ if __name__ == '__main__':
             print("WARNING: model's weights not found, the model will be executed with initialized random weights.")
             print("Ignore this warning if it is a test, or the first training.")
 
-    dataset = load_dataset()
+    dataset = load_dataset(TRANSFORMATION_TRAIN_PATH)
     early_stopping = EarlyStopping(monitor='loss', patience=5)
 
     history = model.fit(x=dataset,

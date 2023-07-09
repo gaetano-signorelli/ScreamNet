@@ -8,7 +8,6 @@ class ScreamClassifier(Model):
 
         super().__init__()
 
-        self.max_pool = layers.MaxPooling2D()
         self.global_avg_pool = layers.GlobalAveragePooling2D()
         self.flatten = layers.Flatten()
 
@@ -51,8 +50,6 @@ class ScreamClassifier(Model):
                                     padding="same",
                                     activation=layers.LeakyReLU())
 
-        self.dense = layers.Dense(16, activation=layers.LeakyReLU())
-
         self.classification_head = layers.Dense(1, activation="sigmoid")
 
     def call(self, x):
@@ -73,9 +70,6 @@ class ScreamClassifier(Model):
         x = self.global_avg_pool(x)
 
         x = self.flatten(x)
-
-        #x = layers.Dropout(0.25)(x)
-        #x = self.dense(x)
 
         x = self.classification_head(x)
 

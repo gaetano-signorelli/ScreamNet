@@ -18,3 +18,17 @@ CLASSIFICATION_BATCH_SIZE = 64
 CLASSIFICATION_VALIDATION_SPLIT = 0.2
 CLASSIFICATION_TRAIN_PATH = os.path.join("data","Dataset")
 CLASSIFICATION_WEIGHTS_PATH = os.path.join("weights","classifier","weights.ckpt")
+
+#Transformation training
+TRANSFORMATION_NORMALIZE = False
+TRANSFORMATION_RUN_EAGERLY = True #False
+TRANSFORMATION_LEARNING_RATE = 1e-3
+TRANSFORMATION_EPOCHS = 50
+TRANSFORMATION_BATCH_SIZE = 64
+TRANSFORMATION_TRAIN_PATH = os.path.join("data","Dataset","Whispers")
+TRANSFORMATION_WEIGHTS_PATH = os.path.join("weights","transformer","weights.ckpt")
+WEIGHT_SCREAM_LOSS = 1.0
+WEIGHT_CORRELATION_LOSS = 1.0
+
+#Others
+RESULTS_PATH = "results"

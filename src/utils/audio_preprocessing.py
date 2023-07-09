@@ -11,9 +11,10 @@ class AudioFile:
         self.wave = self.__read_file(path)
         self.spectrogram = None
 
-    def preprocess(self):
+    def preprocess(self, no_silence=True):
 
-        self.wave = self.__remove_silence()
+        if no_silence:
+            self.wave = self.__remove_silence()
 
         if TRANSFORM_METHOD == "stft":
             self.spectrogram = self.__get_short_fourier()

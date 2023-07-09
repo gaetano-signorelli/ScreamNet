@@ -9,6 +9,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras import Input
 
 from src.models.scream_classifier import ScreamClassifier
+from src.models.noise_detector import NoiseDetector
 from src.models.scream_transformer import ScreamTransformer
 from src.config import *
 
@@ -45,20 +46,33 @@ def load_classifier():
         classifier.load_weights(CLASSIFICATION_WEIGHTS_PATH)
 
     else:
-        raise Exception("No weights found for classifiers: consider to train it first.")
+        raise Exception("No weights found for classifier: consider to train it first.")
 
     return classifier
+
+def load_detector():
+
+    detector = NoiseDetector()
+
+    if os.path.exists(DETECTOR_WEIGHTS_PATH + ".index"):
+        detector.load_weights(DETECTOR_WEIGHTS_PATH)
+
+    else:
+        raise Exception("No weights found for detector: consider to train it first.")
+
+    return detector
 
 if __name__ == '__main__':
 
     tf.keras.utils.set_random_seed(RANDOM_SEED)
 
     classifier = load_classifier()
+    detector = load_detector()
 
     input_shape = (128, N_FRAMES, 1)
     warmup_input = Input(shape=input_shape)
 
-    model = ScreamTransformer(classifier)
+    model = ScreamTransformer(classifier, detector)
     model(warmup_input)
 
     model.compile(optimizer=Adam(TRANSFORMATION_LEARNING_RATE),

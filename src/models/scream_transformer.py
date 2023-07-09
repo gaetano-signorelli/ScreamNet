@@ -117,7 +117,7 @@ class ScreamDecoder(layers.Layer):
 
 class ScreamTransformer(Model):
 
-    def __init__(self, classifier=None):
+    def __init__(self, classifier=None, detector=None):
 
         super().__init__()
 
@@ -125,15 +125,21 @@ class ScreamTransformer(Model):
         if self.classifier is not None:
             self.classifier.trainable = False
 
+        self.detector = detector
+        if self.detector is not None:
+            self.detector.trainable = False
+
         self.encoder = ScreamEncoder()
         self.decoder = ScreamDecoder()
 
         self.flatten_layer = layers.Flatten()
         self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
 
+
         self.total_loss_tracker = metrics.Mean(name="loss")
         self.scream_loss_tracker = metrics.Mean(name="scream")
         self.correlation_loss_tracker = metrics.Mean(name="correlation")
+        self.denoise_loss_tracker = metrics.Mean(name="denoise")
 
     @tf.function
     def scream_loss(self, output):
@@ -141,6 +147,13 @@ class ScreamTransformer(Model):
         pred = self.classifier(output)
 
         return 1.0 - pred
+
+    @tf.function
+    def denoise_loss(self, output):
+
+        pred = self.detector(output)
+
+        return pred
 
     @tf.function
     def correlation_loss(self, input, output):
@@ -163,8 +176,9 @@ class ScreamTransformer(Model):
         if training:
             loss_scream = self.scream_loss(decoded_x)
             loss_corr = self.correlation_loss(x, decoded_x)
+            loss_deno = self.denoise_loss(decoded_x)
 
-            return decoded_x, loss_scream, loss_corr
+            return decoded_x, loss_scream, loss_corr, loss_deno
 
         else:
             return decoded_x
@@ -174,13 +188,14 @@ class ScreamTransformer(Model):
 
         with tf.GradientTape() as tape:
 
-            output, loss_scream, loss_corr = self(input, training=True)
+            output, loss_scream, loss_corr, loss_deno = self(input, training=True)
 
             #Weight losses
             loss_scream = loss_scream * WEIGHT_SCREAM_LOSS
             loss_corr = loss_corr * WEIGHT_CORRELATION_LOSS
+            loss_deno = loss_deno * WEIGHT_DENOISE_LOSS
 
-            total_loss = loss_scream + loss_corr
+            total_loss = loss_scream + loss_corr + loss_deno
 
             loss = tf.math.reduce_mean(total_loss)
 
@@ -188,11 +203,13 @@ class ScreamTransformer(Model):
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
 
         self.total_loss_tracker.update_state(loss)
-        self.scream_loss_tracker.update_state(tf.math.reduce_mean(loss_scream))
-        self.correlation_loss_tracker.update_state(tf.math.reduce_mean(loss_corr))
+        self.scream_loss_tracker.update_state(tf.math.reduce_mean(loss_scream)/WEIGHT_SCREAM_LOSS)
+        self.correlation_loss_tracker.update_state(tf.math.reduce_mean(loss_corr)/WEIGHT_CORRELATION_LOSS)
+        self.denoise_loss_tracker.update_state(tf.math.reduce_mean(loss_deno)/WEIGHT_DENOISE_LOSS)
 
         return {
             "loss": self.total_loss_tracker.result(),
             "scream": self.scream_loss_tracker.result(),
             "correlation": self.correlation_loss_tracker.result(),
+            "denoise": self.denoise_loss_tracker.result(),
         }

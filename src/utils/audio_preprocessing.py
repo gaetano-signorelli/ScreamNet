@@ -11,7 +11,7 @@ class AudioFile:
         self.wave = self.__read_file(path)
         self.spectrogram = None
 
-    def preprocess(self, no_silence=True):
+    def preprocess(self, no_silence=True, filter_acceptability=True, pad=False):
 
         if no_silence:
             self.wave = self.__remove_silence()
@@ -26,7 +26,7 @@ class AudioFile:
         else:
             raise Exception("Invalid transform method")
 
-        segments = self.__split_spectrogram()
+        segments = self.__split_spectrogram(filter_acceptability, pad)
 
         return segments
 
@@ -77,19 +77,26 @@ class AudioFile:
 
         return mfcc
 
-    def __split_spectrogram(self):
-
-        #TODO: replace truncation with padding
+    def __split_spectrogram(self, _filter, pad):
 
         is_acceptable = lambda x: (x > 0.01).sum() / (N_FRAMES*self.spectrogram.shape[0]) > ACCEPTABLE_RATE
 
-        to_remove = self.spectrogram.shape[1] % N_FRAMES
-        self.spectrogram = self.spectrogram[:, :-to_remove]
+        if pad:
+            to_pad = N_FRAMES - (self.spectrogram.shape[1] % N_FRAMES)
+            if to_pad!=N_FRAMES:
+                self.spectrogram = np.pad(self.spectrogram, ((0,0),(0,to_pad)))
+
+        else:
+            to_remove = self.spectrogram.shape[1] % N_FRAMES
+            if to_remove!=0:
+                self.spectrogram = self.spectrogram[:, :-to_remove]
+
         length = self.spectrogram.shape[1] / N_FRAMES
 
         if length!=0:
             segments = np.array_split(self.spectrogram, length, axis=1)
-            segments = list(filter(is_acceptable, segments))
+            if _filter:
+                segments = list(filter(is_acceptable, segments))
         else:
             segments = None
 

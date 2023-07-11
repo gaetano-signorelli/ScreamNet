@@ -5,15 +5,17 @@ from src.utils.audio_preprocessing import AudioFile, save_spectrogram
 
 INPUT_PATHS = [
 #os.path.join("data","GTZAN","Vocals"),
-#os.path.join("data","Metal","Vocals"),
-os.path.join("data","Metal","Noisy vocals"),
+os.path.join("data","Metal","Vocals"),
+#os.path.join("data","Metal","Noisy vocals"),
+#os.path.join("data","Metal","Noisy whispers"),
 #os.path.join("data","Whispers")
 ]
 
 OUTPUT_PATHS = [
 #os.path.join("data","Dataset","Sings"),
-#os.path.join("data","Dataset","Screams"),
-os.path.join("data","Dataset","Noisy screams"),
+os.path.join("data","Dataset","Screams"),
+#os.path.join("data","Dataset","Noisy screams"),
+#os.path.join("data","Dataset","Noisy whispers"),
 #os.path.join("data","Dataset","Whispers"),
 ]
 

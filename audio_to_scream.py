@@ -7,13 +7,15 @@ from tensorflow.keras import Input
 
 from src.utils.audio_preprocessing import AudioFile, save_spectrogram
 from src.models.scream_transformer import ScreamTransformer
+from src.models.denoise_transformer import DenoiseTransformer
 
 from src.config import *
 
-PATH = os.path.join("data","Whispers","2 lug, 19.20ÔÇï.mp3")
-RESULT_PATH = os.path.join(RESULTS_PATH, "test.mp3")
+FILE = "test2"
+PATH = os.path.join("data","Whispers", FILE + ".mp3")
+RESULT_PATH = os.path.join(RESULTS_PATH, FILE + ".mp3")
 
-def screamify(model, input_path, output_path):
+def screamify(transformer, denoiser, input_path, output_path):
 
     print("Preprocessing file " + input_path + "...")
 
@@ -27,16 +29,23 @@ def screamify(model, input_path, output_path):
 
     print("Transforming to screams...")
 
-    output_segments = model.predict(segments)
+    #segments[:, 96:, :, :] = 0
+    output_segments = transformer.predict(segments)
+
+    print("Transformations completed!")
+    print("Denoising...")
+
+    output_segments = denoiser.predict(output_segments)
     output_segments = np.squeeze(output_segments)
 
     scream_spectrogram = np.concatenate(output_segments, axis=-1)
+    #scream_spectrogram[96:,:]=0
 
-    print("Transformations completed!")
+    print("Denoising completed!")
 
     print("Saving...")
 
-    save_spectrogram(scream_spectrogram, os.path.join(RESULTS_PATH,"test_spectrogram.tif"))
+    save_spectrogram(scream_spectrogram, os.path.join(RESULTS_PATH, FILE + ".tif"))
 
     scream_audio = librosa.feature.inverse.mel_to_audio(scream_spectrogram,
                                                         sr=SAMPLING_RATE,
@@ -52,37 +61,28 @@ if __name__ == '__main__':
     input_shape = (128, N_FRAMES, 1)
     warmup_input = Input(shape=input_shape)
 
-    model = ScreamTransformer()
-    model(warmup_input)
+    transformer = ScreamTransformer()
+    denoiser = DenoiseTransformer()
+    transformer(warmup_input)
+    denoiser(warmup_input)
 
-    #model.summary()
+    #transformer.summary()
+    #denoiser.summary()
 
     if os.path.exists(TRANSFORMATION_WEIGHTS_PATH + ".index"):
-        print("Loading model's weights...")
-        model.load_weights(TRANSFORMATION_WEIGHTS_PATH)
-        print("Model's weights successfully loaded!")
+        print("Loading Transformer's weights...")
+        transformer.load_weights(TRANSFORMATION_WEIGHTS_PATH)
+        print("Transformer's weights successfully loaded!")
 
     else:
-        raise Exception("Model's weights not found.")
+        raise Exception("Transformer's weights not found.")
 
-    screamify(model, PATH, RESULT_PATH)
+    if os.path.exists(DENOISER_WEIGHTS_PATH + ".index"):
+        print("Loading Denoiser's weights...")
+        denoiser.load_weights(DENOISER_WEIGHTS_PATH)
+        print("Denoiser's weights successfully loaded!")
 
-    '''
-    input_path = os.path.join("data","Whispers")
-    output_path = os.path.join("data","Metal","Noisy vocals")
-    count = 2
+    else:
+        raise Exception("Denoiser's weights not found.")
 
-    paths = []
-    names = []
-
-    for dirname, dirnames, filenames in os.walk(input_path):
-        for filename in filenames:
-            paths.append(os.path.join(dirname, filename))
-            names.append(os.path.splitext(filename)[0])
-
-    for path, name in zip(paths, names):
-        out_path = os.path.join(output_path, name+str(count)+".mp3")
-        screamify(model, path, out_path)
-
-    print("Ended!")
-    '''
+    screamify(transformer, denoiser, PATH, RESULT_PATH)

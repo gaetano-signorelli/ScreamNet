@@ -38,10 +38,11 @@ def load_dataset():
 
     screams, scream_labels = load_dataset_class(os.path.join(DETECTOR_TRAIN_PATH,"Screams"), 0)
     whispers, whisper_labels = load_dataset_class(os.path.join(DETECTOR_TRAIN_PATH,"Whispers"), 0)
-    noise, noise_labels = load_dataset_class(os.path.join(DETECTOR_TRAIN_PATH,"Noisy screams"), 1)
+    noise_1, noise_labels_1 = load_dataset_class(os.path.join(DETECTOR_TRAIN_PATH,"Noisy screams"), 1)
+    noise_2, noise_labels_2 = load_dataset_class(os.path.join(DETECTOR_TRAIN_PATH,"Noisy whispers"), 1)
 
-    x = np.array(screams + whispers + noise)
-    y = np.array(scream_labels + whisper_labels + noise_labels)
+    x = np.array(screams + whispers + noise_1 + noise_2)
+    y = np.array(scream_labels + whisper_labels + noise_labels_1 + noise_labels_2)
 
     if DETECTOR_NORMALIZE:
         max_val = np.max(x)
@@ -88,7 +89,7 @@ if __name__ == '__main__':
                         callbacks=[early_stopping],
                         validation_split=DETECTOR_VALIDATION_SPLIT,
                         shuffle=True,
-                        class_weight={0:1.8, 1:1.0})
+                        class_weight={0:2.0, 1:1.0})
 
     if SAVE_WEIGHTS:
         model.save_weights(DETECTOR_WEIGHTS_PATH)

@@ -15,8 +15,31 @@ FILE = "test"
 PATH = os.path.join("data","Whispers", FILE + ".mp3")
 RESULT_PATH = os.path.join(RESULTS_PATH, FILE + ".mp3")
 
-INTERPOLATION_RATE = 0.0
 EMPOWER = 50
+
+def build_denoise_set(spectrogram):
+
+    frames = []
+
+    for i in range(spectrogram.shape[1]):
+        start = i - (N_FRAMES//2)
+        end = i + (N_FRAMES//2)
+        pad_left = 0
+        pad_right = 0
+
+        if start<0:
+            pad_left = -start
+            start = 0
+        if end>spectrogram.shape[1]:
+            pad_right = end - spectrogram.shape[1]
+            end = spectrogram.shape[1]
+
+        frame = spectrogram[:, start:end, :]
+        frame = np.pad(frame, ((0,0),(pad_left,pad_right),(0,0)))
+
+        frames.append(frame)
+
+    return frames
 
 def screamify(transformer, denoiser, input_path, output_path):
 
@@ -32,19 +55,23 @@ def screamify(transformer, denoiser, input_path, output_path):
 
     print("Transforming to screams...")
 
-    segments*= EMPOWER
     output_segments = transformer.predict(segments)
 
     print("Transformations completed!")
     print("Denoising...")
 
-    denoised_segments = denoiser.predict(output_segments)
+    scream_spectrogram = np.concatenate(output_segments, axis=-2)
 
-    output_segments =  (1.0 - INTERPOLATION_RATE) * output_segments + INTERPOLATION_RATE * denoised_segments
-    output_segments = np.squeeze(output_segments)
+    frames = build_denoise_set(scream_spectrogram)
+    noise_frames = denoiser.predict(frames)
+    noise_spectrogram = np.concatenate(noise_frames, axis=-2)
 
-    scream_spectrogram = np.concatenate(output_segments, axis=-1)
-    scream_spectrogram[96:,:]=0
+    mask_spectrogram = 1.0 - noise_spectrogram
+    scream_spectrogram *= mask_spectrogram
+
+    scream_spectrogram = np.squeeze(scream_spectrogram)
+    scream_spectrogram*= EMPOWER
+    #scream_spectrogram[96:,:]=0
 
     print("Denoising completed!")
 

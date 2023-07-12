@@ -45,11 +45,12 @@ WEIGHT_CORRELATION_LOSS = 1.0
 DENOISER_NORMALIZE = False
 DENOISER_RUN_EAGERLY = True #False
 DENOISER_LEARNING_RATE = 1e-4
-DENOISER_EPOCHS = 30
-DENOISER_BATCH_SIZE = 32
-DENOISER_VALIDATION_SPLIT = 0.2
-DENOISER_TRAIN_PATH_X = os.path.join("data","Dataset","Noisy screams")
-DENOISER_TRAIN_PATH_Y = os.path.join("data","Dataset","Full screams")
+DENOISER_EPOCHS = 100
+DENOISER_EPOCH_LEN = 1000
+DENOISER_BATCH_SIZE = 64
+DENOISER_BINARIZATION_THRESHOLD = 0.2
+DENOISER_TRAIN_PATH_X = os.path.join("data","Dataset","Noisy screams extended")
+DENOISER_TRAIN_PATH_Y = os.path.join("data","Dataset","Full screams extended")
 DENOISER_WEIGHTS_PATH = os.path.join("weights","denoiser","weights.ckpt")
 
 #Others

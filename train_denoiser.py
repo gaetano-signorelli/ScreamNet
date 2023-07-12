@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError
+from tensorflow.keras.losses import MeanSquaredLogarithmicError
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras import Input
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     model(warmup_input)
 
     model.compile(optimizer=Adam(DENOISER_LEARNING_RATE),
-                loss=MeanSquaredError(),
+                loss=MeanSquaredLogarithmicError(),
                 run_eagerly=DENOISER_RUN_EAGERLY)
 
     model.summary()

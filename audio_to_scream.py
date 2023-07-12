@@ -11,9 +11,12 @@ from src.models.denoise_transformer import DenoiseTransformer
 
 from src.config import *
 
-FILE = "test2"
+FILE = "test"
 PATH = os.path.join("data","Whispers", FILE + ".mp3")
 RESULT_PATH = os.path.join(RESULTS_PATH, FILE + ".mp3")
+
+INTERPOLATION_RATE = 0.0
+EMPOWER = 50
 
 def screamify(transformer, denoiser, input_path, output_path):
 
@@ -29,17 +32,19 @@ def screamify(transformer, denoiser, input_path, output_path):
 
     print("Transforming to screams...")
 
-    #segments[:, 96:, :, :] = 0
+    segments*= EMPOWER
     output_segments = transformer.predict(segments)
 
     print("Transformations completed!")
     print("Denoising...")
 
-    output_segments = denoiser.predict(output_segments)
+    denoised_segments = denoiser.predict(output_segments)
+
+    output_segments =  (1.0 - INTERPOLATION_RATE) * output_segments + INTERPOLATION_RATE * denoised_segments
     output_segments = np.squeeze(output_segments)
 
     scream_spectrogram = np.concatenate(output_segments, axis=-1)
-    #scream_spectrogram[96:,:]=0
+    scream_spectrogram[96:,:]=0
 
     print("Denoising completed!")
 
@@ -84,5 +89,6 @@ if __name__ == '__main__':
 
     else:
         raise Exception("Denoiser's weights not found.")
+
 
     screamify(transformer, denoiser, PATH, RESULT_PATH)

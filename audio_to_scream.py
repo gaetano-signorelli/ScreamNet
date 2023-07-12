@@ -39,7 +39,7 @@ def build_denoise_set(spectrogram):
 
         frames.append(frame)
 
-    return frames
+    return np.array(frames)
 
 def screamify(transformer, denoiser, input_path, output_path):
 
@@ -64,12 +64,12 @@ def screamify(transformer, denoiser, input_path, output_path):
 
     frames = build_denoise_set(scream_spectrogram)
     noise_frames = denoiser.predict(frames)
-    noise_spectrogram = np.concatenate(noise_frames, axis=-2)
+    noise_spectrogram = np.transpose(noise_frames)
 
+    scream_spectrogram = np.squeeze(scream_spectrogram)
     mask_spectrogram = 1.0 - noise_spectrogram
     scream_spectrogram *= mask_spectrogram
 
-    scream_spectrogram = np.squeeze(scream_spectrogram)
     scream_spectrogram*= EMPOWER
     #scream_spectrogram[96:,:]=0
 

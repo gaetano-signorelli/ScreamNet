@@ -11,7 +11,7 @@ from src.models.denoise_transformer import DenoiseGenerator, DenoiseTransformer
 from src.config import *
 
 SAVE_WEIGHTS = True
-LOAD_WEIGHTS = False
+LOAD_WEIGHTS = True
 RANDOM_SEED = 24
 
 if __name__ == '__main__':

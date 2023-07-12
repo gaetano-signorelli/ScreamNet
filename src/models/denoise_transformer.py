@@ -44,6 +44,7 @@ class DenoiseGenerator(Sequence):
         difference = np.abs(noise_spectrogram-normal_spectrogram)
 
         binarization = np.where(difference>DENOISER_BINARIZATION_THRESHOLD, 1.0, 0.0)
+        binarization = np.squeeze(binarization)
 
         return binarization
 
@@ -76,7 +77,7 @@ class DenoiseGenerator(Sequence):
             random_frame = np.pad(random_frame, ((0,0),(pad_left,pad_right),(0,0)))
 
             x.append(random_frame)
-            y.append(self.differences[random_image_index][:,random_point,:])
+            y.append(self.differences[random_image_index][:,random_point])
 
         return np.array(x), np.array(y)
 

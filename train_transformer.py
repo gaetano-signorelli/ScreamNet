@@ -14,7 +14,7 @@ from src.models.scream_transformer import ScreamTransformer
 from src.config import *
 
 SAVE_WEIGHTS = True
-LOAD_WEIGHTS = False
+LOAD_WEIGHTS = True
 RANDOM_SEED = 24
 
 def load_dataset(root):
@@ -91,7 +91,7 @@ if __name__ == '__main__':
             print("Ignore this warning if it is a test, or the first training.")
 
     dataset = load_dataset(TRANSFORMATION_TRAIN_PATH)
-    early_stopping = EarlyStopping(monitor='loss', patience=5)
+    early_stopping = EarlyStopping(monitor='loss', patience=10)
 
     history = model.fit(x=dataset,
                         batch_size=TRANSFORMATION_BATCH_SIZE,

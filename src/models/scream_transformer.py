@@ -135,7 +135,6 @@ class ScreamTransformer(Model):
         self.flatten_layer = layers.Flatten()
         self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
 
-
         self.total_loss_tracker = metrics.Mean(name="loss")
         self.scream_loss_tracker = metrics.Mean(name="scream")
         self.correlation_loss_tracker = metrics.Mean(name="correlation")

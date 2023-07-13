@@ -48,8 +48,8 @@ class DenoiseGenerator(Sequence):
             random_point = random.randrange(random_image.shape[1])
 
             sample_y = self.normal_spectrograms[random_image_index][:,random_point,:]
-            if (sample_y > 1).sum() / 128 < 0.05:
-                continue
+            #if (sample_y > 1).sum() / 128 < 0.05:
+            #    continue
 
             start = random_point - (N_FRAMES//2)
             end = random_point + (N_FRAMES//2)
@@ -141,6 +141,10 @@ class DenoiseTransformer(Model):
         self.dense_1 = layers.Dense(256, activation=layers.LeakyReLU())
         self.dense_2 = layers.Dense(128, activation="relu")
 
+        self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
+
+        self.total_loss_tracker = metrics.Mean(name="loss")
+
     @tf.function
     def call(self, x):
 
@@ -153,3 +157,32 @@ class DenoiseTransformer(Model):
         x = tf.expand_dims(x, axis=-1)
 
         return x
+
+    @tf.function
+    def correlation_loss(self, input, output):
+
+        correlation = self.cosine_similarity([input, output])
+
+        norm_correlation =  (2.0 - (correlation + 1.0)) / 2.0
+
+        return norm_correlation
+
+    @tf.function
+    def train_step(self, data):
+
+        x, y = data
+
+        with tf.GradientTape() as tape:
+
+            pred = self(x)
+            loss = self.correlation_loss(pred, y)
+            loss = tf.math.reduce_mean(loss)
+
+        grads = tape.gradient(loss, self.trainable_weights)
+        self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
+
+        self.total_loss_tracker.update_state(loss)
+
+        return {
+            "loss": self.total_loss_tracker.result()
+        }

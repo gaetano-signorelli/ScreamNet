@@ -3,7 +3,7 @@ import numpy as np
 
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import BinaryCrossentropy
+from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras import Input
 
@@ -11,7 +11,7 @@ from src.models.denoise_transformer import DenoiseGenerator, DenoiseTransformer
 from src.config import *
 
 SAVE_WEIGHTS = True
-LOAD_WEIGHTS = True
+LOAD_WEIGHTS = False
 RANDOM_SEED = 24
 
 if __name__ == '__main__':
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     model(warmup_input)
 
     model.compile(optimizer=Adam(DENOISER_LEARNING_RATE),
-                loss=BinaryCrossentropy(),
+                loss=MeanSquaredError(),
                 run_eagerly=DENOISER_RUN_EAGERLY)
 
     model.summary()
@@ -44,7 +44,7 @@ if __name__ == '__main__':
             print("WARNING: model's weights not found, the model will be executed with initialized random weights.")
             print("Ignore this warning if it is a test, or the first training.")
 
-    early_stopping = EarlyStopping(monitor='loss', patience=3)
+    early_stopping = EarlyStopping(monitor='loss', patience=10)
 
     history = model.fit(generator,
                         callbacks=[early_stopping],

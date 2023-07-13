@@ -13,14 +13,9 @@ class DenoiseGenerator(Sequence):
     def __init__(self):
 
         self.noise_spectrograms = self.load_dataset_class(DENOISER_TRAIN_PATH_X)
-        normal_spectrograms = self.load_dataset_class(DENOISER_TRAIN_PATH_Y)
+        self.normal_spectrograms = self.load_dataset_class(DENOISER_TRAIN_PATH_Y)
 
-        assert len(self.noise_spectrograms)==len(normal_spectrograms)
-
-        self.differences = []
-        for i in range(len(normal_spectrograms)):
-            self.differences.append(self.highlight_noise(self.noise_spectrograms[i],
-                                                    normal_spectrograms[i]))
+        assert len(self.noise_spectrograms)==len(self.normal_spectrograms)
 
         self.n_spectrograms = len(self.noise_spectrograms)
 
@@ -39,15 +34,6 @@ class DenoiseGenerator(Sequence):
 
         return samples
 
-    def highlight_noise(self, noise_spectrogram, normal_spectrogram):
-
-        difference = np.abs(noise_spectrogram-normal_spectrogram)
-
-        binarization = np.where(difference>DENOISER_BINARIZATION_THRESHOLD, 1.0, 0.0)
-        binarization = np.squeeze(binarization)
-
-        return binarization
-
     def on_epoch_end(self):
         pass
 
@@ -56,10 +42,14 @@ class DenoiseGenerator(Sequence):
         x = []
         y = []
 
-        for i in range(DENOISER_BATCH_SIZE):
+        while len(x) < DENOISER_BATCH_SIZE:
             random_image_index = random.randrange(self.n_spectrograms)
             random_image = self.noise_spectrograms[random_image_index]
             random_point = random.randrange(random_image.shape[1])
+
+            sample_y = self.normal_spectrograms[random_image_index][:,random_point,:]
+            if (sample_y > 1).sum() / 128 < 0.05:
+                continue
 
             start = random_point - (N_FRAMES//2)
             end = random_point + (N_FRAMES//2)
@@ -77,7 +67,7 @@ class DenoiseGenerator(Sequence):
             random_frame = np.pad(random_frame, ((0,0),(pad_left,pad_right),(0,0)))
 
             x.append(random_frame)
-            y.append(self.differences[random_image_index][:,random_point])
+            y.append(sample_y)
 
         return np.array(x), np.array(y)
 
@@ -149,7 +139,7 @@ class DenoiseTransformer(Model):
 
         self.flatten_layer = layers.Flatten()
         self.dense_1 = layers.Dense(256, activation=layers.LeakyReLU())
-        self.dense_2 = layers.Dense(128, activation="sigmoid")
+        self.dense_2 = layers.Dense(128, activation="relu")
 
     @tf.function
     def call(self, x):
@@ -159,5 +149,7 @@ class DenoiseTransformer(Model):
         x = self.flatten_layer(x)
         x = self.dense_1(x)
         x = self.dense_2(x)
+
+        x = tf.expand_dims(x, axis=-1)
 
         return x

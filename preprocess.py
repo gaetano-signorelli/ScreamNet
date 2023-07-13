@@ -4,22 +4,22 @@ from tqdm import tqdm
 
 from src.utils.audio_preprocessing import AudioFile, save_spectrogram
 
-EXTENDED = True
+EXTENDED = False
 
 INPUT_PATHS = [
 #os.path.join("data","GTZAN","Vocals"),
-os.path.join("data","Metal","Vocals"),
-os.path.join("data","Metal","Noisy vocals"),
+#os.path.join("data","Metal","Vocals"),
+#os.path.join("data","Metal","Noisy vocals"),
 #os.path.join("data","Metal","Noisy whispers"),
-#os.path.join("data","Whispers")
+os.path.join("data","Whispers")
 ]
 
 OUTPUT_PATHS = [
 #os.path.join("data","Dataset","Sings"),
-os.path.join("data","Dataset","Full screams extended"),
-os.path.join("data","Dataset","Noisy screams extended"),
+#os.path.join("data","Dataset","Full screams extended"),
+#os.path.join("data","Dataset","Noisy screams extended"),
 #os.path.join("data","Dataset","Noisy whispers"),
-#os.path.join("data","Dataset","Whispers"),
+os.path.join("data","Dataset","Whispers"),
 ]
 
 def get_audio_paths(root):
@@ -42,9 +42,7 @@ if __name__ == '__main__':
 
         for path_file, path_name in tqdm(zip(path_files, path_names)):
             audio_file = AudioFile(path_file)
-            segments = audio_file.preprocess(no_silence=False,
-                                            filter_acceptability=False,
-                                            pad=True)
+            segments = audio_file.preprocess()
 
             if segments is not None:
 

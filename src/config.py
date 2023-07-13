@@ -32,7 +32,7 @@ DETECTOR_WEIGHTS_PATH = os.path.join("weights","detector","weights.ckpt")
 #Transformation training
 TRANSFORMATION_NORMALIZE = False
 TRANSFORMATION_RUN_EAGERLY = True #False
-TRANSFORMATION_LEARNING_RATE = 1e-5
+TRANSFORMATION_LEARNING_RATE = 1e-4
 TRANSFORMATION_EPOCHS = 100
 TRANSFORMATION_BATCH_SIZE = 32
 TRANSFORMATION_TRAIN_PATH = os.path.join("data","Dataset","Whispers")
@@ -44,11 +44,10 @@ WEIGHT_CORRELATION_LOSS = 1.0
 #Denoising training
 DENOISER_NORMALIZE = False
 DENOISER_RUN_EAGERLY = True #False
-DENOISER_LEARNING_RATE = 1e-4
+DENOISER_LEARNING_RATE = 1e-5
 DENOISER_EPOCHS = 10
 DENOISER_EPOCH_LEN = 1000
 DENOISER_BATCH_SIZE = 64
-DENOISER_BINARIZATION_THRESHOLD = 0.2
 DENOISER_TRAIN_PATH_X = os.path.join("data","Dataset","Noisy screams extended")
 DENOISER_TRAIN_PATH_Y = os.path.join("data","Dataset","Full screams extended")
 DENOISER_WEIGHTS_PATH = os.path.join("weights","denoiser","weights.ckpt")

@@ -11,12 +11,12 @@ from src.models.denoise_transformer import DenoiseTransformer
 
 from src.config import *
 
-FILE = "aaaaaaahhh"
+FILE = "it works"
 PATH = os.path.join("data","Whispers", FILE + ".mp3")
 RESULT_PATH = os.path.join(RESULTS_PATH, FILE + ".mp3")
 
 EMPOWER = 50
-INTERPOLATION_RATE = 1.0
+INTERPOLATION_RATE = 0.0
 
 def build_denoise_set(spectrogram):
 
@@ -72,7 +72,9 @@ def screamify(transformer, denoiser, input_path, output_path):
     scream_spectrogram = (1.0-INTERPOLATION_RATE) * np.squeeze(scream_spectrogram) + INTERPOLATION_RATE * denoised_scream_spectrogram
 
     scream_spectrogram*= EMPOWER
-    #scream_spectrogram[96:,:]=0
+
+    if INTERPOLATION_RATE<0.95:
+        scream_spectrogram[96:,:]=0
 
     print("Denoising completed!")
 

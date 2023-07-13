@@ -14,7 +14,7 @@ from src.models.scream_transformer import ScreamTransformer
 from src.config import *
 
 SAVE_WEIGHTS = True
-LOAD_WEIGHTS = True
+LOAD_WEIGHTS = False
 RANDOM_SEED = 24
 
 def load_dataset(root):

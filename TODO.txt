@@ -1,17 +1,17 @@
-1.Adjust scripts and files
+1.Adjust scripts and files V
   -Rebuild scream dataset removing silences V
   -Edit config V
   -Remove preprocess V
 
 2. Implement Generator
-  -Same architecture of MelGAN
-  -Use Kepra to get Mel
+  -Same architecture of MelGAN V
+  -Use Kapre to get Mel V
   -Input and Output = 22050 samples (1 second)
   -[Try with weight normalization]
 
 3. Implement Discriminator(s)
-  -Same architecture of MelGAN
-  -Unbounded score as output of each discriminator
+  -Same architecture of MelGAN V
+  -Unbounded score as output of each discriminator V
   -[Try with weight normalization]
 
 4. Implement Loader

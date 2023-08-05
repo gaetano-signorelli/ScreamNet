@@ -2,6 +2,7 @@ import os
 
 #Preprocessing
 SAMPLING_RATE = 22050
+N_FFT = 1024
 WINDOW_SIZE = 1024
 HOP_LENGTH = 256
 MEL_CHANNELS = 80

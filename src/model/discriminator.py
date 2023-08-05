@@ -57,8 +57,6 @@ class DiscriminatorBlock(layers.Layer):
 
     def call(self, x):
 
-        #TODO: check for paddings
-
         x = self.conv_1(x)
 
         x = self.downsample_1(x)

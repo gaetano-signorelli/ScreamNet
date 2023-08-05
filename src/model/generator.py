@@ -2,6 +2,8 @@ import numpy as np
 import tensorflow as tf
 from tf.keras import layers, Model
 
+from src.model.mel import WavToMel, WavToMelLite
+
 from src.config import *
 
 class ResidualLayer(layers.Layer):
@@ -43,11 +45,11 @@ class ResidualLayer(layers.Layer):
 
 class Generator(Model):
 
-    def __init__(self):
-
-        #TODO: add Kepra Mel layer
+    def __init__(self, tflite=False):
 
         super().__init__()
+
+        self.mel_layer = WavToMelLite() if tflite else WavToMel()
 
         upsample_rates = [8,8,2,2]
         self.n_residual_layers = 3
@@ -88,6 +90,8 @@ class Generator(Model):
     def call(self, x):
 
         #TODO: check for using reflection paddings (check same length)
+
+        x = self.mel_layer(x)
 
         x = self.conv_1(x)
 

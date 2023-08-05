@@ -104,4 +104,6 @@ class Generator(Model):
 
         x = self.conv_2(x)
 
+        x = tf.squeeze(x)
+
         return x

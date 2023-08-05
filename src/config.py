@@ -17,6 +17,7 @@ SEGMENT_LENGTH = 22050
 EPOCHS = 3000
 EPOCH_LEN = 1000
 BATCH_SIZE = 16
+CORRELATION_WEIGHT = 10
 
 #Paths
 SCREAMS_PATH = os.path.join("data","Metal","Vocals no silence")

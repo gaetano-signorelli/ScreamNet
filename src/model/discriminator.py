@@ -57,6 +57,8 @@ class DiscriminatorBlock(layers.Layer):
 
     def call(self, x):
 
+        x = tf.expand_dims(x, axis=1)
+
         x = self.conv_1(x)
 
         x = self.downsample_1(x)
@@ -66,6 +68,8 @@ class DiscriminatorBlock(layers.Layer):
 
         x = self.conv_2(x)
         x = self.conv_3(x)
+
+        x = tf.squeeze(x)
 
         return x
 

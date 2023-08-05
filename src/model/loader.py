@@ -2,7 +2,7 @@ import random
 import librosa
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
+from tf import keras
 
 from src.config import *
 

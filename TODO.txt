@@ -14,7 +14,7 @@
   -Unbounded score as output of each discriminator V
   -[Try with weight normalization]
 
-4. Implement Loader
+4. Implement Loader V
   -Use librosa to load data when needed V
   -Load BATCH_SIZE random 1 second segments (Window-based) V
   -Pad if necessary V
@@ -24,13 +24,16 @@
   -[Try with amplitude augmenting]
   -[Try to add Gaussian noise]
 
-5. Implement Train loop
-  -Train generator and discriminator asynchronously at each train step
-  -Use main losses from MelGAN
-  -Use correlation loss ([try with correlation between mels, or other losses, if needed])
-  -Pass all generated samples to the discriminator, as well as a same number of screams
+5. Implement Train loop V
+  -Train generator and discriminator asynchronously at each train step V
+  -Use main losses from MelGAN V
+  -Use correlation loss ([try with correlation between mels, or other losses, if needed]) V
+  -Pass all generated samples to the discriminator, as well as a same number of screams V
 
-6. Convert to TFLite
-
-7. Test
+6. Train & Test
+  -Implement Trainer
+  -Save weights checkpoints
+  -Save samples of tests
   -It may be necessary to train using more recordings and with different speakers
+
+7. Convert to TFLite

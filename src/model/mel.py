@@ -72,6 +72,4 @@ class WavToMelLite(Model):
         x = tf.clip_by_value(x, clip_value_min=1e-5, clip_value_max=tf.float32.max) #Clamp
         x = tf.math.log(x) / tf.math.log(tf.constant(10, dtype=tf.float32)) #Move to decibels (log10)
 
-        x = tf.expand_dims(x, axis=1)
-
         return x

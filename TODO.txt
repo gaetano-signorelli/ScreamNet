@@ -3,24 +3,24 @@
   -Edit config V
   -Remove preprocess V
 
-2. Implement Generator
+2. Implement Generator V
   -Same architecture of MelGAN V
   -Use Kapre to get Mel V
   -Input and Output = 22050 samples (1 second)
   -[Try with weight normalization]
 
-3. Implement Discriminator(s)
+3. Implement Discriminator(s) V
   -Same architecture of MelGAN V
   -Unbounded score as output of each discriminator V
   -[Try with weight normalization]
 
 4. Implement Loader
-  -Use librosa to load data when needed
-  -Remove silences
-  -Load BATCH_SIZE random 1 second segments (Window-based)
-  -Pad if necessary
-  -Load both whispers for generation and screams for discrimination
-  -[Try with librosa's normalization]
+  -Use librosa to load data when needed V
+  -Load BATCH_SIZE random 1 second segments (Window-based) V
+  -Pad if necessary V
+  -Load both whispers for generation and screams for discrimination V
+  -[Try remove silences whispers]
+  -[Try with librosa's normalization] V
   -[Try with amplitude augmenting]
   -[Try to add Gaussian noise]
 

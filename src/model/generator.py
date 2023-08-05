@@ -8,6 +8,8 @@ class ResidualLayer(layers.Layer):
 
     def __init__(self, dim, dilation=1):
 
+        super().__init__()
+
         self.dilated_conv = layers.Conv1D(filters=dim,
                                         kernel_size=3,
                                         strides=1,
@@ -42,6 +44,8 @@ class ResidualLayer(layers.Layer):
 class Generator(Model):
 
     def __init__(self):
+
+        #TODO: add Kepra Mel layer
 
         super().__init__()
 
@@ -83,7 +87,7 @@ class Generator(Model):
 
     def call(self, x):
 
-        #TODO: check for using reflection paddings
+        #TODO: check for using reflection paddings (check same length)
 
         x = self.conv_1(x)
 

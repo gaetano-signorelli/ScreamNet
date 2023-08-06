@@ -21,6 +21,7 @@ class ScreamGAN(Model):
         self.discriminator = Discriminator()
 
         self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
+        self.flatten_layer = layers.Flatten()
 
         self.gen_loss_tracker = metrics.Mean(name="generator")
         self.corr_loss_tracker = metrics.Mean(name="correlation")
@@ -45,6 +46,12 @@ class ScreamGAN(Model):
 
     @tf.function
     def __correlation_loss(self, original_waves, generated_waves):
+
+        original_waves = self.generator.mel_layer(original_waves)
+        generated_waves = self.generator.mel_layer(generated_waves)
+
+        original_waves = self.flatten_layer(original_waves)
+        generated_waves = self.flatten_layer(generated_waves)
 
         correlation = self.cosine_similarity([original_waves, generated_waves])
         correlation = tf.math.reduce_mean(correlation)
@@ -89,7 +96,7 @@ class ScreamGAN(Model):
             disc_loss = self.__discriminator_loss(scores_fake, scores_real)
 
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
-        gradients_of_generator = gen_tape.gradient(total_gen_loss, self.generator.trainable_variables)
+        gradients_of_generator = gen_tape.gradient(corr_loss, self.generator.trainable_variables)
 
         self.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
         self.generator_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))

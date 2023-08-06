@@ -1,3 +1,5 @@
+import threading
+
 import random
 import librosa
 import numpy as np
@@ -24,15 +26,20 @@ class DatasetLoader(keras.utils.Sequence):
         pass
 
     def __getitem__(self, idx):
+
         batch_whispers = []
         batch_screams = []
 
-        for _ in range(BATCH_SIZE):
-            whisper_audio = random.choice(self.whispers)
-            scream_audio = random.choice(self.screams)
+        threads = []
 
-            batch_whispers.append(self.__load_segment(whisper_audio))
-            batch_screams.append(self.__load_segment(scream_audio))
+        for _ in range(BATCH_SIZE):
+
+            t = threading.Thread(target=self.__prepare_batch_sample, args=(batch_whispers, batch_screams))
+            threads.append(t)
+            t.start()
+
+        for thread in threads:
+            thread.join()
 
         batch_whispers = np.array(batch_whispers)
         batch_screams = np.array(batch_screams)
@@ -42,6 +49,14 @@ class DatasetLoader(keras.utils.Sequence):
     def __len__(self):
 
         return EPOCH_LEN
+
+    def __prepare_batch_sample(self, batch_whispers, batch_screams):
+
+        whisper_audio = random.choice(self.whispers)
+        scream_audio = random.choice(self.screams)
+
+        batch_whispers.append(self.__load_segment(whisper_audio))
+        batch_screams.append(self.__load_segment(scream_audio))
 
     def __get_files(self, root):
 

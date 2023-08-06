@@ -69,6 +69,9 @@ class WavToMelLite(Model):
 
     def call(self, x):
 
+        batch_size = tf.shape(x)[0]
+        mel_basis = tf.repeat(self.mel_basis, repeats=[batch_size], axis=0)
+
         p = (N_FFT - HOP_LENGTH) // 2
         padding = tf.constant([[0, 0], [p, p]])
         x = tf.pad(x, padding, "REFLECT")

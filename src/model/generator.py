@@ -60,7 +60,7 @@ class Generator(Model):
         n_filters = 512
 
         self.paddings_start = tf.constant([[0, 0], [0, 0], [3, 3]])
-        self.paddings_end = tf.constant([[0, 0], [0, 0], [20, 20]])
+        self.paddings_end = tf.constant([[0, 0], [0, 0], [0, 34]])
 
         self.conv_1 = layers.Conv1D(filters=n_filters,
                                     kernel_size=7,
@@ -110,8 +110,9 @@ class Generator(Model):
                 x = self.residual_layers[i](x)
                 i += 1
 
-        x = tf.pad(x, self.paddings_end, "REFLECT")
+        x = tf.pad(x, self.paddings_start, "REFLECT")
         x = self.conv_2(x)
+        x = tf.pad(x, self.paddings_end, "REFLECT")
 
         x = tf.squeeze(x, axis=1)
 

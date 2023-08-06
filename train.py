@@ -18,7 +18,7 @@ SAVE_WEIGHTS = True
 SAVE_SAMPLES = True
 LOAD_WEIGHTS = False
 
-CHECKPOINTS_DISTANCE = 20
+CHECKPOINTS_DISTANCE = 5
 
 TEST_SAMPLES = [
 "test",
@@ -39,29 +39,30 @@ class SaveCallback(callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
 
-        if epoch % self.checkpoint_distance == 0:
+        if (epoch+1) % self.checkpoint_distance == 0:
 
             if self.save_weights:
+                print()
                 print("Saving checkpoint...")
                 self.model.save_weights(WEIGHTS_PATH)
 
             if self.save_samples:
                 print("Generating and saving samples...")
                 for test_name in self.test_samples:
-                    self.__save_sample(test_name, epoch)
+                    self.__save_sample(test_name, epoch+1)
                 print("Samples saved successfully!")
 
     def __save_sample(self, file_name, epoch):
 
         #Load file with librosa
         input_path = os.path.join(WHISPERS_PATH, file_name + ".mp3")
-        original_wave = librosa.load(input_path, sr=SAMPLING_RATE)
+        original_wave, sr = librosa.load(input_path, sr=SAMPLING_RATE)
 
         #Normalize
-        original_wave = librosa.util.normalize(wave) * 0.95
+        original_wave = librosa.util.normalize(original_wave) * 0.95
 
         #Split in 1sec segments (22050 samples)
-        diff = original_wave.shape[0] % SEGMENT_LENGTH
+        diff = SEGMENT_LENGTH - (original_wave.shape[0] % SEGMENT_LENGTH)
         original_wave = np.pad(original_wave, (0, diff))
         n_chunks = original_wave.shape[0] // SEGMENT_LENGTH
         segments = np.split(original_wave, n_chunks)
@@ -75,7 +76,7 @@ class SaveCallback(callbacks.Callback):
 
         #Save
         output_path = os.path.join(TRAIN_SAMPLES_PATH, file_name + "_" + str(epoch) + ".mp3")
-        sf.write(output_path, scream, SAMPLING_RATE, "mp3")
+        sf.write(output_path, scream, SAMPLING_RATE, format="mp3")
 
 if __name__ == '__main__':
 

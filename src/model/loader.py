@@ -70,6 +70,6 @@ class DatasetLoader(keras.utils.Sequence):
             segment = wave[audio_start : audio_start + SEGMENT_LENGTH]
         else:
             diff = SEGMENT_LENGTH - wave.shape[0]
-            segment = np.pad(segment, (0, diff))
+            segment = np.pad(wave, (0, diff))
 
         return segment

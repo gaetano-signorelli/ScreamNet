@@ -28,7 +28,7 @@ class ScreamGAN(Model):
         wave = self.generator(x)
         output = self.discriminator(wave)
 
-        return output
+        return wave, output
 
     @tf.function
     def __generator_loss(self, scores_fake):

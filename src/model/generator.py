@@ -106,4 +106,6 @@ class Generator(Model):
 
         x = tf.squeeze(x)
 
+        assert x.shape[1]==SEGMENT_LENGTH
+
         return x

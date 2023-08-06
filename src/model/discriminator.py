@@ -83,16 +83,20 @@ class Discriminator(Model):
 
         self.avg_pool_layer = layers.AveragePooling1D(pool_size=4,
                                                     strides=2,
-                                                    data_format="channels_last")
+                                                    data_format="channels_first")
 
     def call(self, x):
 
         score_1 = self.block_1(x)
 
+        x = tf.expand_dims(x, axis=1)
         x = self.avg_pool_layer(x)
+        x = tf.squeeze(x)
         score_2 = self.block_2(x)
 
+        x = tf.expand_dims(x, axis=1)
         x = self.avg_pool_layer(x)
+        x = tf.squeeze(x)
         score_3 = self.block_3(x)
 
         scores = [score_1, score_2, score_3]

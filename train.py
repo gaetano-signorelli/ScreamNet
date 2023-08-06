@@ -40,7 +40,7 @@ class SaveCallback(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
 
-        if if epoch % self.checkpoint_distance == 0:
+        if epoch % self.checkpoint_distance == 0:
 
             if self.save_weights:
                 print("Saving checkpoint...")
@@ -49,7 +49,7 @@ class SaveCallback(Callback):
             if self.save_samples:
                 print("Generating and saving samples...")
                 for test_name in self.test_samples:
-                    self.save_sample(test_name, epoch)
+                    self.__save_sample(test_name, epoch)
                 print("Samples saved successfully!")
 
     def __save_sample(self, file_name, epoch):
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     model = ScreamGAN()
     model(warmup_input)
 
-    model.compile(optimizer=Adam(LEARNING_RATE), run_eagerly=CLASSIFICATION_RUN_EAGERLY)
+    model.compile(optimizer=Adam(LEARNING_RATE), run_eagerly=RUN_EAGERLY)
     model.summary()
 
     if LOAD_WEIGHTS:

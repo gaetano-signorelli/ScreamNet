@@ -24,3 +24,4 @@ SCREAMS_PATH = os.path.join("data","Metal","Vocals no silence")
 WHISPERS_PATH = os.path.join("data","Dataset","Whispers")
 WEIGHTS_PATH = os.path.join("weights","weights.ckpt")
 RESULTS_PATH = "results"
+TRAIN_SAMPLES_PATH = os.path.join("results","train samples")

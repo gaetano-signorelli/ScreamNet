@@ -1,94 +1,111 @@
 import os
 import numpy as np
-from PIL import Image
+import librosa
+import soundfile as sf
 from tqdm import tqdm
 
 import tensorflow as tf
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import BinaryCrossentropy
-from tensorflow.keras.metrics import BinaryAccuracy
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras import Input
+from tf.keras.optimizers import Adam
+from tf.keras import Input, callbacks.Callback
 
-from src.models.scream_classifier import ScreamClassifier
+from src.model.loader import DatasetLoader
+from src.model.gan import ScreamGAN
+
 from src.config import *
 
-SAVE_WEIGHTS = True
-LOAD_WEIGHTS = False
 RANDOM_SEED = 24
 
-def load_dataset_class(root, class_value):
+SAVE_WEIGHTS = True
+SAVE_SAMPLES = True
+LOAD_WEIGHTS = False
 
-    samples = []
+CHECKPOINTS_DISTANCE = 50
 
-    print("Loading files from " + root)
+TEST_SAMPLES = [
+"test",
+"test2",
+"test3"
+]
 
-    for dirname, dirnames, filenames in os.walk(root):
-        for filename in tqdm(filenames):
-            file_path = os.path.join(dirname, filename)
-            sample = Image.open(file_path)
-            sample = np.expand_dims(sample, axis=-1)
-            samples.append(sample)
+class SaveCallback(Callback):
 
-    labels = [class_value] * len(samples)
+    def __init__(self, save_weights, save_samples, cp_distance, test_samples):
 
-    return samples, labels
+        super().__init__()
 
-def load_dataset():
+        self.save_weights = save_weights
+        self.save_samples = save_samples
+        self.checkpoint_distance = cp_distance
+        self.test_samples = test_samples
 
-    sings, sings_labels = load_dataset_class(os.path.join(CLASSIFICATION_TRAIN_PATH,"Sings"), 0)
-    whisps, whisps_labels = load_dataset_class(os.path.join(CLASSIFICATION_TRAIN_PATH,"Whispers"), 0)
-    screams, scream_labels = load_dataset_class(os.path.join(CLASSIFICATION_TRAIN_PATH,"Screams"), 1)
+    def on_epoch_end(self, epoch, logs=None):
 
-    x = np.array(sings + whisps + screams)
-    y = np.array(sings_labels + whisps_labels + scream_labels)
+        if if epoch % self.checkpoint_distance == 0:
 
-    if CLASSIFICATION_NORMALIZE:
-        max_val = np.max(x)
-        x = x / max_val
+            if self.save_weights:
+                print("Saving checkpoint...")
+                self.model.save_weights(WEIGHTS_PATH)
 
-    print("{} samples in the dataset".format(len(x)))
+            if self.save_samples:
+                print("Generating and saving samples...")
+                for test_name in self.test_samples:
+                    self.save_sample(test_name, epoch)
+                print("Samples saved successfully!")
 
-    return x, y
+    def __save_sample(self, file_name, epoch):
+
+        #Load file with librosa
+        input_path = os.path.join(WHISPERS_PATH, file_name + ".mp3")
+        original_wave = librosa.load(input_path, sr=SAMPLING_RATE)
+
+        #Normalize
+        original_wave = librosa.util.normalize(wave) * 0.95
+
+        #Split in 1sec segments (22050 samples)
+        diff = original_wave.shape[0] % SEGMENT_LENGTH
+        original_wave = np.pad(original_wave, (0, diff))
+        n_chunks = original_wave.shape[0] // SEGMENT_LENGTH
+        segments = np.split(original_wave, n_chunks)
+        batch = np.array(segments)
+
+        #Predict (transform to screams)
+        results = self.model.generator.predict(batch)
+
+        #Concatenate (flatten)
+        scream = np.concatenate(results)
+
+        #Save
+        output_path = os.path.join(TRAIN_SAMPLES_PATH, file_name + "_" + str(epoch) + ".mp3")
+        sf.write(output_path, scream, SAMPLING_RATE, "mp3")
 
 if __name__ == '__main__':
 
     tf.keras.utils.set_random_seed(RANDOM_SEED)
 
-    input_shape = (128, N_FRAMES, 1)
+    input_shape = (SEGMENT_LENGTH)
     warmup_input = Input(shape=input_shape)
 
-    model = ScreamClassifier()
+    model = ScreamGAN()
     model(warmup_input)
 
-    model.compile(optimizer=Adam(CLASSIFICATION_LEARNING_RATE),
-                loss=BinaryCrossentropy(),
-                metrics = [BinaryAccuracy()],
-                run_eagerly=CLASSIFICATION_RUN_EAGERLY)
-
+    model.compile(optimizer=Adam(LEARNING_RATE), run_eagerly=CLASSIFICATION_RUN_EAGERLY)
     model.summary()
 
     if LOAD_WEIGHTS:
-        if os.path.exists(CLASSIFICATION_WEIGHTS_PATH + ".index"):
+        if os.path.exists(WEIGHTS_PATH + ".index"):
             print("Loading model's weights...")
-            model.load_weights(CLASSIFICATION_WEIGHTS_PATH)
+            model.load_weights(WEIGHTS_PATH)
             print("Model's weights successfully loaded!")
 
         else:
             print("WARNING: model's weights not found, the model will be executed with initialized random weights.")
             print("Ignore this warning if it is a test, or the first training.")
 
-    x, y = load_dataset()
-    early_stopping = EarlyStopping(monitor='loss', patience=5)
+    dataset_loader = DatasetLoader()
 
-    history = model.fit(x=x,
-                        y=y,
-                        batch_size=CLASSIFICATION_BATCH_SIZE,
-                        epochs=CLASSIFICATION_EPOCHS,
-                        callbacks=[early_stopping],
-                        validation_split=CLASSIFICATION_VALIDATION_SPLIT,
-                        shuffle=True,
-                        class_weight={0:1.0, 1:1.8})
+    save_callback = SaveCallback(SAVE_WEIGHTS, SAVE_SAMPLES, CHECKPOINTS_DISTANCE, TEST_SAMPLES)
+
+    history = model.fit(x=dataset_loader, callbacks=[save_callback], epochs=EPOCHS)
 
     if SAVE_WEIGHTS:
-        model.save_weights(CLASSIFICATION_WEIGHTS_PATH)
+        model.save_weights(WEIGHTS_PATH)

@@ -5,8 +5,7 @@ import soundfile as sf
 from tqdm import tqdm
 
 import tensorflow as tf
-from tf.keras.optimizers import Adam
-from tf.keras import Input, callbacks.Callback
+from tensorflow.keras import Input, callbacks
 
 from src.model.loader import DatasetLoader
 from src.model.gan import ScreamGAN
@@ -19,7 +18,7 @@ SAVE_WEIGHTS = True
 SAVE_SAMPLES = True
 LOAD_WEIGHTS = False
 
-CHECKPOINTS_DISTANCE = 50
+CHECKPOINTS_DISTANCE = 20
 
 TEST_SAMPLES = [
 "test",
@@ -27,7 +26,7 @@ TEST_SAMPLES = [
 "test3"
 ]
 
-class SaveCallback(Callback):
+class SaveCallback(callbacks.Callback):
 
     def __init__(self, save_weights, save_samples, cp_distance, test_samples):
 
@@ -88,7 +87,7 @@ if __name__ == '__main__':
     model = ScreamGAN()
     model(warmup_input)
 
-    model.compile(optimizer=Adam(LEARNING_RATE), run_eagerly=RUN_EAGERLY)
+    model.compile(run_eagerly=RUN_EAGERLY)
     model.summary()
 
     if LOAD_WEIGHTS:

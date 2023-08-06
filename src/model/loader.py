@@ -2,7 +2,7 @@ import random
 import librosa
 import numpy as np
 import tensorflow as tf
-from tf import keras
+from tensorflow import keras
 
 from src.config import *
 
@@ -10,21 +10,27 @@ class DatasetLoader(keras.utils.Sequence):
 
     def __init__(self):
 
-        self.whispers = self.__get_files(WHISPERS_PATH)
-        self.screams = self.__get_files(SCREAMS_PATH)
+        print("Loading files...")
+
+        whispers_files = self.__get_files(WHISPERS_PATH)
+        screams_files = self.__get_files(SCREAMS_PATH)
+
+        self.whispers = [self.__load_audio(whisper_file) for whisper_file in whispers_files]
+        self.screams = [self.__load_audio(scream_file) for scream_file in screams_files]
+
+        print("Files loaded!")
 
     def on_epoch_end(self):
         pass
 
     def __getitem__(self, idx):
-
-        whispers_batch_audios = np.random.choice(self.whispers, size=BATCH_SIZE)
-        screams_batch_audios = np.random.choice(self.screams, size=BATCH_SIZE)
-
         batch_whispers = []
         batch_screams = []
 
-        for whisper_audio, scream_audio in zip(whispers_batch_audios, screams_batch_audios):
+        for _ in range(BATCH_SIZE):
+            whisper_audio = random.choice(self.whispers)
+            scream_audio = random.choice(self.screams)
+
             batch_whispers.append(self.__load_segment(whisper_audio))
             batch_screams.append(self.__load_segment(scream_audio))
 
@@ -60,9 +66,7 @@ class DatasetLoader(keras.utils.Sequence):
 
         return wave
 
-    def __load_segment(self, audio_file):
-
-        wave = self.__load_audio(audio_file)
+    def __load_segment(self, wave):
 
         if wave.shape[0] >= SEGMENT_LENGTH:
             max_audio_start = wave.shape[0] - SEGMENT_LENGTH

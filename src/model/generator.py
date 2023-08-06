@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tf.keras import layers, Model
+from tensorflow.keras import layers, Model
 
 from src.model.mel import WavToMel, WavToMelLite
 
@@ -11,6 +11,8 @@ class ResidualLayer(layers.Layer):
     def __init__(self, dim, dilation=1):
 
         super().__init__()
+
+        self.paddings = tf.constant([[0, 0], [0, 0], [dilation, dilation]])
 
         self.dilated_conv = layers.Conv1D(filters=dim,
                                         kernel_size=3,
@@ -33,7 +35,8 @@ class ResidualLayer(layers.Layer):
 
     def call(self, x):
 
-        dilated_x = self.dilated_conv(x)
+        dilated_x = tf.pad(x, self.paddings, "REFLECT")
+        dilated_x = self.dilated_conv(dilated_x)
         dilated_x = self.feed_forward_1(dilated_x)
 
         x = self.feed_forward_2(x)
@@ -51,10 +54,13 @@ class Generator(Model):
 
         self.mel_layer = WavToMelLite() if tflite else WavToMel()
 
-        upsample_rates = [8,8,2,2]
+        self.upsample_rates = [8,8,2,2]
         self.n_residual_layers = 3
 
         n_filters = 512
+
+        self.paddings_start = tf.constant([[0, 0], [0, 0], [3, 3]])
+        self.paddings_end = tf.constant([[0, 0], [0, 0], [20, 20]])
 
         self.conv_1 = layers.Conv1D(filters=n_filters,
                                     kernel_size=7,
@@ -67,17 +73,18 @@ class Generator(Model):
         self.upsample_layers = []
         self.residual_layers = []
 
-        for rate in upsample_rates:
+        for rate in self.upsample_rates:
             upsample_layer = layers.Conv1DTranspose(filters=n_filters,
                                                     kernel_size=rate*2,
                                                     strides=rate,
+                                                    padding="same",
                                                     data_format="channels_first",
                                                     activation=layers.LeakyReLU(0.2))
-            upsample_layers.append(upsample_layer)
+            self.upsample_layers.append(upsample_layer)
 
             for i in range(self.n_residual_layers):
                 residual_layer = ResidualLayer(n_filters, dilation=3**i)
-                residual_layers.append(residual_layer)
+                self.residual_layers.append(residual_layer)
 
             n_filters = n_filters // 2
 
@@ -89,23 +96,23 @@ class Generator(Model):
 
     def call(self, x):
 
-        #TODO: check for using reflection paddings (check same length)
+        #TODO: check last padding
 
         x = self.mel_layer(x)
 
+        x = tf.pad(x, self.paddings_start, "REFLECT")
         x = self.conv_1(x)
 
         i = 0
-        for upsample_layer in upsample_layers:
+        for upsample_layer in self.upsample_layers:
             x = upsample_layer(x)
             for _ in range(self.n_residual_layers):
                 x = self.residual_layers[i](x)
                 i += 1
 
+        x = tf.pad(x, self.paddings_end, "REFLECT")
         x = self.conv_2(x)
 
-        x = tf.squeeze(x)
-
-        assert x.shape[1]==SEGMENT_LENGTH
+        x = tf.squeeze(x, axis=1)
 
         return x

@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
-from tf.keras import layers, Model, activations
+from tensorflow.keras import layers, Model, activations, metrics
+from tensorflow.keras.optimizers import Adam
 
 from src.model.generator import Generator
 from src.model.discriminator import Discriminator
@@ -12,6 +13,9 @@ class ScreamGAN(Model):
     def __init__(self):
 
         super().__init__()
+
+        self.discriminator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
+        self.generator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
 
         self.generator = Generator()
         self.discriminator = Discriminator()
@@ -66,7 +70,7 @@ class ScreamGAN(Model):
 
         return loss
 
-    @tf.function
+    @tf.autograph.experimental.do_not_convert
     def train_step(self, data):
 
         whispers, screams = data
@@ -87,8 +91,8 @@ class ScreamGAN(Model):
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         gradients_of_generator = gen_tape.gradient(total_gen_loss, self.generator.trainable_variables)
 
-        discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
-        generator_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
+        self.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
+        self.generator_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
 
         self.gen_loss_tracker.update_state(gen_loss)
         self.corr_loss_tracker.update_state(corr_loss)

@@ -36,8 +36,8 @@
   -Save samples of tests V
 
 7. Test
-  -Fix compile errors
-  -Fix runtime errors
+  -Fix compile errors V
+  -Fix runtime errors V
   -Run trainings and fix until it works
   -[It may be necessary to train using more recordings and with different speakers]
 

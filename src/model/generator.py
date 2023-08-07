@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, Model
 
-from src.model.mel import WavToMel, WavToMelLite
+from src.model.mel import WavToMel
 
 from src.utils.weight_normalization import WeightNormalization
 
@@ -59,7 +59,7 @@ class Generator(Model):
 
         super().__init__()
 
-        self.mel_layer = WavToMelLite() if tflite else WavToMel()
+        self.mel_layer = WavToMel(tflite)
 
         self.upsample_rates = [8,8,2,2]
         self.n_residual_layers = 3

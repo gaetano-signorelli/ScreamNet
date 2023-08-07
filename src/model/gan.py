@@ -10,14 +10,14 @@ from src.config import *
 
 class ScreamGAN(Model):
 
-    def __init__(self):
+    def __init__(self, tflite=False):
 
         super().__init__()
 
         self.discriminator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
         self.generator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
 
-        self.generator = Generator()
+        self.generator = Generator(tflite)
         self.discriminator = Discriminator()
 
         self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
@@ -28,6 +28,7 @@ class ScreamGAN(Model):
         self.total_gen_loss_tracker = metrics.Mean(name="total generator")
         self.disc_loss_tracker = metrics.Mean(name="discriminator")
 
+    @tf.function
     def call(self, x):
 
         wave = self.generator(x)
@@ -38,9 +39,11 @@ class ScreamGAN(Model):
     @tf.function
     def __generator_loss(self, scores_fake):
 
-        loss = 0
-        for scores in scores_fake:
-            loss -= tf.math.reduce_mean(scores)
+        score_fake_1 = -tf.math.reduce_mean(scores_fake[0])
+        score_fake_2 = -tf.math.reduce_mean(scores_fake[1])
+        score_fake_3 = -tf.math.reduce_mean(scores_fake[2])
+
+        loss = score_fake_1 + score_fake_2 + score_fake_3
 
         return loss
 
@@ -63,15 +66,17 @@ class ScreamGAN(Model):
     @tf.function
     def __discriminator_loss(self, scores_fake, scores_real):
 
-        loss_real = 0
-        for scores in scores_real:
-            norm_scores = activations.relu(1 - scores)
-            loss_real += tf.math.reduce_mean(norm_scores)
+        score_real_1 = tf.math.reduce_mean(activations.relu(1 - scores_real[0]))
+        score_real_2 = tf.math.reduce_mean(activations.relu(1 - scores_real[1]))
+        score_real_3 = tf.math.reduce_mean(activations.relu(1 - scores_real[2]))
 
-        loss_fake = 0
-        for scores in scores_fake:
-            norm_scores = activations.relu(1 + scores)
-            loss_fake += tf.math.reduce_mean(norm_scores)
+        loss_real = score_real_1 + score_real_2 + score_real_3
+
+        score_fake_1 = tf.math.reduce_mean(activations.relu(1 + scores_fake[0]))
+        score_fake_2 = tf.math.reduce_mean(activations.relu(1 + scores_fake[1]))
+        score_fake_3 = tf.math.reduce_mean(activations.relu(1 + scores_fake[2]))
+
+        loss_fake = score_fake_1 + score_fake_2 + score_fake_3
 
         loss = loss_real + loss_fake
 
@@ -96,7 +101,7 @@ class ScreamGAN(Model):
             disc_loss = self.__discriminator_loss(scores_fake, scores_real)
 
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
-        gradients_of_generator = gen_tape.gradient(corr_loss, self.generator.trainable_variables)
+        gradients_of_generator = gen_tape.gradient(total_gen_loss, self.generator.trainable_variables)
 
         self.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
         self.generator_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))

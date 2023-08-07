@@ -1,4 +1,6 @@
 data
+results/train samples
+weights
 
 __pycache__
 *.pyc

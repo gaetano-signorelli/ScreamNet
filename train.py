@@ -13,6 +13,7 @@ from src.model.gan import ScreamGAN
 from src.config import *
 
 RANDOM_SEED = 24
+COMPLETED = 100
 
 SAVE_WEIGHTS = True
 SAVE_SAMPLES = True
@@ -23,7 +24,9 @@ CHECKPOINTS_DISTANCE = 5
 TEST_SAMPLES = [
 "test",
 "test2",
-"test3"
+"test3",
+"vore",
+"recording test"
 ]
 
 class SaveCallback(callbacks.Callback):
@@ -49,7 +52,7 @@ class SaveCallback(callbacks.Callback):
             if self.save_samples:
                 print("Generating and saving samples...")
                 for test_name in self.test_samples:
-                    self.__save_sample(test_name, epoch+1)
+                    self.__save_sample(test_name, epoch+COMPLETED+1)
                 print("Samples saved successfully!")
 
     def __save_sample(self, file_name, epoch):

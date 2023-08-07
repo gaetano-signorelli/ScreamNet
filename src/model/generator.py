@@ -5,6 +5,7 @@ from tensorflow.keras import layers, Model
 from src.model.mel import WavToMel
 
 from src.utils.weight_normalization import WeightNormalization
+from src.utils.conv_1d_transpose import TFConvTranspose1d
 
 from src.config import *
 
@@ -14,24 +15,24 @@ class ResidualLayer(layers.Layer):
 
         super().__init__()
 
-        self.paddings = tf.constant([[0, 0], [0, 0], [dilation, dilation]])
+        self.paddings = tf.constant([[0, 0], [dilation, dilation], [0, 0]])
 
         self.dilated_conv = layers.Conv1D(filters=dim,
                                         kernel_size=3,
                                         strides=1,
-                                        data_format="channels_first",
+                                        data_format="channels_last",
                                         dilation_rate=dilation,
                                         activation=layers.LeakyReLU(0.2))
 
         self.feed_forward_1 = layers.Conv1D(filters=dim,
                                         kernel_size=1,
                                         strides=1,
-                                        data_format="channels_first")
+                                        data_format="channels_last")
 
         self.feed_forward_2 = layers.Conv1D(filters=dim,
                                         kernel_size=1,
                                         strides=1,
-                                        data_format="channels_first")
+                                        data_format="channels_last")
 
         self.leaky_layer = layers.LeakyReLU(0.2)
 
@@ -66,13 +67,13 @@ class Generator(Model):
 
         n_filters = 512
 
-        self.paddings_start = tf.constant([[0, 0], [0, 0], [3, 3]])
-        self.paddings_end = tf.constant([[0, 0], [0, 0], [0, 34]])
+        self.paddings_start = tf.constant([[0, 0], [3, 3], [0, 0]])
+        self.paddings_end = tf.constant([[0, 0], [0, 34], [0, 0]])
 
         self.conv_1 = layers.Conv1D(filters=n_filters,
                                     kernel_size=7,
                                     strides=1,
-                                    data_format="channels_first",
+                                    data_format="channels_last",
                                     activation=layers.LeakyReLU(0.2))
 
         n_filters = n_filters // 2
@@ -81,15 +82,12 @@ class Generator(Model):
         self.residual_layers = []
 
         for rate in self.upsample_rates:
-            upsample_layer = layers.Conv1DTranspose(filters=n_filters,
-                                                    kernel_size=rate*2,
-                                                    strides=rate,
-                                                    padding="same",
-                                                    data_format="channels_first",
-                                                    activation=layers.LeakyReLU(0.2))
-
-            if USE_WEIGHT_NORMALIZATION:
-                upsample_layer = WeightNormalization(upsample_layer)
+            upsample_layer = TFConvTranspose1d(filters=n_filters,
+                                                kernel_size=rate*2,
+                                                strides=rate,
+                                                padding="same",
+                                                data_format="channels_last",
+                                                activation=layers.LeakyReLU(0.2))
 
             self.upsample_layers.append(upsample_layer)
 
@@ -102,7 +100,7 @@ class Generator(Model):
         self.conv_2 = layers.Conv1D(filters=1,
                                     kernel_size=7,
                                     strides=1,
-                                    data_format="channels_first",
+                                    data_format="channels_last",
                                     activation="tanh")
 
         if USE_WEIGHT_NORMALIZATION:
@@ -127,6 +125,6 @@ class Generator(Model):
         x = self.conv_2(x)
         x = tf.pad(x, self.paddings_end, "REFLECT")
 
-        x = tf.squeeze(x, axis=1)
+        x = tf.squeeze(x, axis=-1)
 
         return x

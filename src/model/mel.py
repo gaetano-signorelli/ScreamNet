@@ -50,7 +50,7 @@ class WavToMel(Model):
         x = tf.transpose(x, perm=[0, 2, 1]) #(B, Frequency, Time)
 
         x = self.dot_layer([x, mel_basis]) #(B, Time, Mel_Channels)
-        x = tf.transpose(x, perm=[0, 2, 1]) #(B, Mel_Channels, Time)
+        #x = tf.transpose(x, perm=[0, 2, 1]) #(B, Mel_Channels, Time)
 
         x = tf.clip_by_value(x, clip_value_min=1e-5, clip_value_max=tf.float32.max) #Clamp
         x = tf.math.log(x) / tf.math.log(tf.constant(10, dtype=tf.float32)) #Move to decibels (log10)

@@ -42,3 +42,12 @@
   -[It may be necessary to train using more recordings and with different speakers]
 
 7. Convert to TFLite
+
+
+Current TODO:
+-Make weight normalization work
+-Add kernels initializers
+-Add preprocessing normalization in network
+-Train for 100 epochs
+-Run TFLite conversion
+-Implement model in Android Studio

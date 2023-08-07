@@ -12,19 +12,19 @@ class DiscriminatorBlock(layers.Layer):
 
         super().__init__()
 
-        self.paddings = tf.constant([[0, 0], [0, 0], [7, 7]])
+        self.paddings = tf.constant([[0, 0], [7, 7], [0, 0]])
 
         self.conv_1 = layers.Conv1D(filters=16,
                                     kernel_size=15,
                                     strides=1,
-                                    data_format="channels_first",
+                                    data_format="channels_last",
                                     activation=layers.LeakyReLU(0.2))
 
         self.downsample_1 = layers.Conv1D(filters=64,
                                         kernel_size=41,
                                         strides=4,
                                         groups=4,
-                                        data_format="channels_first",
+                                        data_format="channels_last",
                                         padding="same",
                                         activation=layers.LeakyReLU(0.2))
 
@@ -32,7 +32,7 @@ class DiscriminatorBlock(layers.Layer):
                                         kernel_size=41,
                                         strides=4,
                                         groups=16,
-                                        data_format="channels_first",
+                                        data_format="channels_last",
                                         padding="same",
                                         activation=layers.LeakyReLU(0.2))
 
@@ -40,7 +40,7 @@ class DiscriminatorBlock(layers.Layer):
                                         kernel_size=41,
                                         strides=4,
                                         groups=64,
-                                        data_format="channels_first",
+                                        data_format="channels_last",
                                         padding="same",
                                         activation=layers.LeakyReLU(0.2))
 
@@ -48,14 +48,14 @@ class DiscriminatorBlock(layers.Layer):
                                         kernel_size=41,
                                         strides=4,
                                         groups=256,
-                                        data_format="channels_first",
+                                        data_format="channels_last",
                                         padding="same",
                                         activation=layers.LeakyReLU(0.2))
 
         self.conv_2 = layers.Conv1D(filters=1024,
                                     kernel_size=5,
                                     strides=1,
-                                    data_format="channels_first",
+                                    data_format="channels_last",
                                     padding="same",
                                     activation=layers.LeakyReLU(0.2))
 
@@ -63,21 +63,21 @@ class DiscriminatorBlock(layers.Layer):
                                     kernel_size=3,
                                     strides=1,
                                     padding="same",
-                                    data_format="channels_first")
+                                    data_format="channels_last")
 
         if USE_WEIGHT_NORMALIZATION:
             self.conv_1 = WeightNormalization(self.conv_1)
             self.conv_2 = WeightNormalization(self.conv_2)
             self.conv_3 = WeightNormalization(self.conv_3)
 
-            self.downsample_1 = WeightNormalization(self.downsample_1)
-            self.downsample_2 = WeightNormalization(self.downsample_2)
-            self.downsample_3 = WeightNormalization(self.downsample_3)
-            self.downsample_4 = WeightNormalization(self.downsample_4)
+            #self.downsample_1 = WeightNormalization(self.downsample_1)
+            #self.downsample_2 = WeightNormalization(self.downsample_2)
+            #self.downsample_3 = WeightNormalization(self.downsample_3)
+            #self.downsample_4 = WeightNormalization(self.downsample_4)
 
     def call(self, x):
 
-        x = tf.expand_dims(x, axis=1)
+        x = tf.expand_dims(x, axis=-1)
 
         x = tf.pad(x, self.paddings, "REFLECT")
         x = self.conv_1(x)
@@ -90,7 +90,7 @@ class DiscriminatorBlock(layers.Layer):
         x = self.conv_2(x)
         x = self.conv_3(x)
 
-        x = tf.squeeze(x, axis=1)
+        x = tf.squeeze(x, axis=-1)
 
         return x
 
@@ -106,20 +106,20 @@ class Discriminator(Model):
 
         self.avg_pool_layer = layers.AveragePooling1D(pool_size=4,
                                                     strides=2,
-                                                    data_format="channels_first")
+                                                    data_format="channels_last")
 
     def call(self, x):
 
         score_1 = self.block_1(x)
 
-        x = tf.expand_dims(x, axis=1)
+        x = tf.expand_dims(x, axis=-1)
         x = self.avg_pool_layer(x)
-        x = tf.squeeze(x, axis=1)
+        x = tf.squeeze(x, axis=-1)
         score_2 = self.block_2(x)
 
-        x = tf.expand_dims(x, axis=1)
+        x = tf.expand_dims(x, axis=-1)
         x = self.avg_pool_layer(x)
-        x = tf.squeeze(x, axis=1)
+        x = tf.squeeze(x, axis=-1)
         score_3 = self.block_3(x)
 
         scores = [score_1, score_2, score_3]

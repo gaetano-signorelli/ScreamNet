@@ -32,6 +32,7 @@ class WavToMel(Model):
 
         self.dot_layer = layers.Dot(axes=(1,2))
 
+    @tf.function
     def call(self, x):
 
         batch_size = tf.shape(x)[0]

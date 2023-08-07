@@ -10,15 +10,15 @@ from src.config import *
 
 class ScreamGAN(Model):
 
-    def __init__(self, tflite=False):
+    def __init__(self, tflite=False, use_weight_norm=True):
 
         super().__init__()
 
         self.discriminator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
         self.generator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
 
-        self.generator = Generator(tflite)
-        self.discriminator = Discriminator()
+        self.generator = Generator(tflite, use_weight_norm)
+        self.discriminator = Discriminator(use_weight_norm)
 
         self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
         self.flatten_layer = layers.Flatten()

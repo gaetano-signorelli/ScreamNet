@@ -13,7 +13,7 @@ if __name__ == '__main__':
     input_shape = (SEGMENT_LENGTH)
     warmup_input = Input(shape=input_shape)
 
-    gan = ScreamGAN(tflite=True)
+    gan = ScreamGAN(tflite=True, use_weight_norm=False)
     gan(warmup_input)
 
     if os.path.exists(WEIGHTS_PATH + ".index"):

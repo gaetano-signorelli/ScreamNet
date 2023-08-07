@@ -1,8 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 
-from src.config import *
-
 from src.utils.weight_normalization import WeightNormalization
 
 class TFConvTranspose1d(layers.Layer):
@@ -15,6 +13,7 @@ class TFConvTranspose1d(layers.Layer):
         padding,
         data_format,
         activation,
+        use_weight_norm,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -28,9 +27,10 @@ class TFConvTranspose1d(layers.Layer):
             activation=activation
         )
 
-        if USE_WEIGHT_NORMALIZATION:
+        if use_weight_norm:
             self.conv1d_transpose = WeightNormalization(self.conv1d_transpose)
 
+    @tf.function
     def call(self, x):
         """Calculate forward propagation.
         Args:

@@ -7,12 +7,12 @@
   -Same architecture of MelGAN V
   -Use Kapre to get Mel V
   -Input and Output = 22050 samples (1 second) V
-  -[Try with weight normalization]
+  -[Try with weight normalization] V
 
 3. Implement Discriminator(s) V
   -Same architecture of MelGAN V
   -Unbounded score as output of each discriminator V
-  -[Try with weight normalization]
+  -[Try with weight normalization] V
 
 4. Implement Loader V
   -Use librosa to load data when needed V
@@ -35,19 +35,19 @@
   -Save weights checkpoints V
   -Save samples of tests V
 
-7. Test
+7. Test V
   -Fix compile errors V
   -Fix runtime errors V
-  -Run trainings and fix until it works
+  -Run trainings and fix until it works V
   -[It may be necessary to train using more recordings and with different speakers]
 
 7. Convert to TFLite
 
 
-Current TODO:
--Make weight normalization work
--Add kernels initializers
--Add preprocessing normalization in network
--Train for 100 epochs
--Run TFLite conversion
--Implement model in Android Studio
+8. Refinements
+  -Make weight normalization work V
+  -Add preprocessing normalization in network V
+  -Run TFLite conversion V
+  -Solve train_step WARNING for AutoGraph
+  -Train for 100 epochs
+  -Implement model in Android Studio

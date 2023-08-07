@@ -165,6 +165,7 @@ class WeightNormalization(tf.keras.layers.Wrapper):
 
         super().build()
 
+    @tf.function
     def call(self, inputs):
         """Call `Layer`."""
         if not self.initialized:

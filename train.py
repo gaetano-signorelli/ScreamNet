@@ -61,9 +61,6 @@ class SaveCallback(callbacks.Callback):
         input_path = os.path.join(WHISPERS_PATH, file_name + ".mp3")
         original_wave, sr = librosa.load(input_path, sr=SAMPLING_RATE)
 
-        #Normalize
-        original_wave = librosa.util.normalize(original_wave) * 0.95
-
         #Split in 1sec segments (22050 samples)
         diff = SEGMENT_LENGTH - (original_wave.shape[0] % SEGMENT_LENGTH)
         original_wave = np.pad(original_wave, (0, diff))
@@ -88,7 +85,7 @@ if __name__ == '__main__':
     input_shape = (SEGMENT_LENGTH)
     warmup_input = Input(shape=input_shape)
 
-    model = ScreamGAN()
+    model = ScreamGAN(use_weight_norm=USE_WEIGHT_NORMALIZATION)
     model(warmup_input)
 
     model.compile(run_eagerly=RUN_EAGERLY)

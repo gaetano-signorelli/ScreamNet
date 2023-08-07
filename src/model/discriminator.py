@@ -8,7 +8,7 @@ from src.config import *
 
 class DiscriminatorBlock(layers.Layer):
 
-    def __init__(self):
+    def __init__(self, use_weight_norm):
 
         super().__init__()
 
@@ -65,16 +65,17 @@ class DiscriminatorBlock(layers.Layer):
                                     padding="same",
                                     data_format="channels_last")
 
-        if USE_WEIGHT_NORMALIZATION:
+        if use_weight_norm:
             self.conv_1 = WeightNormalization(self.conv_1)
             self.conv_2 = WeightNormalization(self.conv_2)
             self.conv_3 = WeightNormalization(self.conv_3)
 
-            #self.downsample_1 = WeightNormalization(self.downsample_1)
-            #self.downsample_2 = WeightNormalization(self.downsample_2)
-            #self.downsample_3 = WeightNormalization(self.downsample_3)
-            #self.downsample_4 = WeightNormalization(self.downsample_4)
+            self.downsample_1 = WeightNormalization(self.downsample_1)
+            self.downsample_2 = WeightNormalization(self.downsample_2)
+            self.downsample_3 = WeightNormalization(self.downsample_3)
+            self.downsample_4 = WeightNormalization(self.downsample_4)
 
+    @tf.function
     def call(self, x):
 
         x = tf.expand_dims(x, axis=-1)
@@ -96,18 +97,19 @@ class DiscriminatorBlock(layers.Layer):
 
 class Discriminator(Model):
 
-    def __init__(self):
+    def __init__(self, use_weight_norm):
 
         super().__init__()
 
-        self.block_1 = DiscriminatorBlock()
-        self.block_2 = DiscriminatorBlock()
-        self.block_3 = DiscriminatorBlock()
+        self.block_1 = DiscriminatorBlock(use_weight_norm)
+        self.block_2 = DiscriminatorBlock(use_weight_norm)
+        self.block_3 = DiscriminatorBlock(use_weight_norm)
 
         self.avg_pool_layer = layers.AveragePooling1D(pool_size=4,
                                                     strides=2,
                                                     data_format="channels_last")
 
+    @tf.function
     def call(self, x):
 
         score_1 = self.block_1(x)

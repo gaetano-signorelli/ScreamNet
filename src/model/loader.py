@@ -72,9 +72,6 @@ class DatasetLoader(keras.utils.Sequence):
 
         wave, sampling_rate = librosa.load(audio_file, sr=SAMPLING_RATE)
 
-        if NORMALIZE:
-            wave = librosa.util.normalize(wave) * 0.95 # *0.95 comes from the official MelGan implementation
-
         if AUGMENT:
             amplitude = np.random.uniform(low=0.3, high=1.0)
             wave = wave * amplitude

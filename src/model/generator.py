@@ -4,6 +4,8 @@ from tensorflow.keras import layers, Model
 
 from src.model.mel import WavToMel, WavToMelLite
 
+from src.utils.weight_normalization import WeightNormalization
+
 from src.config import *
 
 class ResidualLayer(layers.Layer):
@@ -32,6 +34,11 @@ class ResidualLayer(layers.Layer):
                                         data_format="channels_first")
 
         self.leaky_layer = layers.LeakyReLU(0.2)
+
+        if USE_WEIGHT_NORMALIZATION:
+            self.dilated_conv = WeightNormalization(self.dilated_conv)
+            self.feed_forward_1 = WeightNormalization(self.feed_forward_1)
+            self.feed_forward_2 = WeightNormalization(self.feed_forward_2)
 
     def call(self, x):
 
@@ -80,6 +87,10 @@ class Generator(Model):
                                                     padding="same",
                                                     data_format="channels_first",
                                                     activation=layers.LeakyReLU(0.2))
+
+            if USE_WEIGHT_NORMALIZATION:
+                upsample_layer = WeightNormalization(upsample_layer)
+
             self.upsample_layers.append(upsample_layer)
 
             for i in range(self.n_residual_layers):
@@ -94,9 +105,11 @@ class Generator(Model):
                                     data_format="channels_first",
                                     activation="tanh")
 
-    def call(self, x):
+        if USE_WEIGHT_NORMALIZATION:
+            self.conv_1 = WeightNormalization(self.conv_1)
+            self.conv_2 = WeightNormalization(self.conv_2)
 
-        #TODO: check last padding
+    def call(self, x):
 
         x = self.mel_layer(x)
 

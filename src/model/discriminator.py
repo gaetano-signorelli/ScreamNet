@@ -2,6 +2,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, Model
 
+from src.utils.weight_normalization import WeightNormalization
+
 from src.config import *
 
 class DiscriminatorBlock(layers.Layer):
@@ -62,6 +64,16 @@ class DiscriminatorBlock(layers.Layer):
                                     strides=1,
                                     padding="same",
                                     data_format="channels_first")
+
+        if USE_WEIGHT_NORMALIZATION:
+            self.conv_1 = WeightNormalization(self.conv_1)
+            self.conv_2 = WeightNormalization(self.conv_2)
+            self.conv_3 = WeightNormalization(self.conv_3)
+
+            self.downsample_1 = WeightNormalization(self.downsample_1)
+            self.downsample_2 = WeightNormalization(self.downsample_2)
+            self.downsample_3 = WeightNormalization(self.downsample_3)
+            self.downsample_4 = WeightNormalization(self.downsample_4)
 
     def call(self, x):
 

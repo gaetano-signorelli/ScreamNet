@@ -63,7 +63,8 @@ class DiscriminatorBlock(layers.Layer):
                                     kernel_size=3,
                                     strides=1,
                                     padding="same",
-                                    data_format="channels_last")
+                                    data_format="channels_last",
+                                    dtype='float32')
 
         if use_weight_norm:
             self.conv_1 = WeightNormalization(self.conv_1)

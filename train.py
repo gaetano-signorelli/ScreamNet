@@ -13,13 +13,13 @@ from src.model.gan import ScreamGAN
 from src.config import *
 
 RANDOM_SEED = 24
-COMPLETED = 0
+COMPLETED = 1150
 
 SAVE_WEIGHTS = True
 SAVE_SAMPLES = True
-LOAD_WEIGHTS = False
+LOAD_WEIGHTS = True
 
-CHECKPOINTS_DISTANCE = 5
+CHECKPOINTS_DISTANCE = 50
 
 TEST_SAMPLES = [
 "test",

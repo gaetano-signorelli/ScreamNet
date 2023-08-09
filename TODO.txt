@@ -41,13 +41,9 @@
   -Run trainings and fix until it works V
   -[It may be necessary to train using more recordings and with different speakers]
 
-7. Convert to TFLite
-
-
-8. Refinements
+8. Refinements V
   -Make weight normalization work V
   -Add preprocessing normalization in network V
   -Run TFLite conversion V
-  -Solve train_step WARNING for AutoGraph
-  -Train for 100 epochs
-  -Implement model in Android Studio
+
+9. Implement on Android Studio

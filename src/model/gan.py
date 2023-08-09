@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers, Model, activations, metrics
+from tensorflow.keras import layers, Model, activations, metrics, mixed_precision
 from tensorflow.keras.optimizers import Adam
 
 from src.model.generator import Generator
@@ -18,10 +18,14 @@ class ScreamGAN(Model):
         self.generator_optimizer=Adam(LEARNING_RATE, beta_1=BETA_1, beta_2=BETA_2)
 
         self.generator = Generator(tflite, use_weight_norm)
+
+        if USE_MIXED_PRECISION:
+            mixed_precision.set_global_policy('mixed_float16')
+
         self.discriminator = Discriminator(use_weight_norm)
 
-        self.cosine_similarity = layers.Dot(axes=(1), normalize=True)
-        self.flatten_layer = layers.Flatten()
+        self.cosine_similarity = layers.Dot(axes=(1), normalize=True, dtype='float32')
+        self.flatten_layer = layers.Flatten(dtype='float32')
 
         self.gen_loss_tracker = metrics.Mean(name="generator")
         self.corr_loss_tracker = metrics.Mean(name="correlation")

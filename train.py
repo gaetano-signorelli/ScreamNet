@@ -15,7 +15,7 @@ from src.model.gan import ScreamGAN
 from src.config import *
 
 RANDOM_SEED = 24
-COMPLETED = 0
+COMPLETED = 50
 
 SAVE_WEIGHTS = True
 SAVE_SAMPLES = True

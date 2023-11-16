@@ -4,9 +4,9 @@ from tqdm import tqdm
 
 from src.utils.audio_preprocessing import AudioFile
 
-INPUT_PATH = os.path.join("data","Metal","Vocals")
+INPUT_PATH = os.path.join("data","GTZAN","Vocals")
 
-OUTPUT_PATH = os.path.join("data","Metal","Vocals no silence")
+OUTPUT_PATH = os.path.join("data","GTZAN","Vocals no silence")
 
 def get_audio_paths(root):
 
@@ -21,6 +21,9 @@ def get_audio_paths(root):
     return paths, names
 
 if __name__ == '__main__':
+
+    if not os.path.exists(OUTPUT_PATH):
+        os.mkdir(OUTPUT_PATH)
 
     path_files, path_names = get_audio_paths(INPUT_PATH)
 

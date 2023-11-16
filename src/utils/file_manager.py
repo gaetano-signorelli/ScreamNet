@@ -16,6 +16,9 @@ def get_files_names(root):
 
     for dirname, dirnames, filenames in os.walk(root):
         for filename in filenames:
-            names.append(filename)
+            words = filename.split(".")
+            extension = words.pop()
+            name = ".".join(words)
+            names.append(name)
 
     return names

@@ -1,5 +1,7 @@
 import os
 
+DATASET_NAME = "Whispers"
+
 #Preprocessing
 SAMPLING_RATE = 22050
 N_FFT = 1024
@@ -23,8 +25,11 @@ BATCH_SIZE = 8
 CORRELATION_WEIGHT = 250
 
 #Paths
-SCREAMS_PATH = os.path.join("data","Metal","Vocals no silence")
-WHISPERS_PATH = os.path.join("data","Whispers")
-WEIGHTS_PATH = os.path.join("weights","weights.ckpt")
+SCREAMS_PATH = os.path.join("data","Dataset","Screams")
+TRAINING_PATH = os.path.join("data","Dataset", DATASET_NAME)
+WEIGHTS_PATH = os.path.join("weights","{}.ckpt".format(DATASET_NAME))
 RESULTS_PATH = "results"
-TRAIN_SAMPLES_PATH = os.path.join("results","train samples")
+TRAIN_SAMPLES_PATH = os.path.join("results","{} test samples".format(DATASET_NAME))
+
+if not os.path.exists(TRAIN_SAMPLES_PATH):
+    os.mkdir(TRAIN_SAMPLES_PATH)

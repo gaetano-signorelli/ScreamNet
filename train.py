@@ -4,6 +4,8 @@ import librosa
 import soundfile as sf
 from tqdm import tqdm
 
+from src.utils.file_manager import get_files_names
+
 import tensorflow as tf
 from tensorflow.keras import Input, callbacks
 
@@ -13,7 +15,7 @@ from src.model.gan import ScreamGAN
 from src.config import *
 
 RANDOM_SEED = 24
-COMPLETED = 1150
+COMPLETED = 0
 
 SAVE_WEIGHTS = True
 SAVE_SAMPLES = True
@@ -21,24 +23,16 @@ LOAD_WEIGHTS = True
 
 CHECKPOINTS_DISTANCE = 50
 
-TEST_SAMPLES = [
-"test",
-"test2",
-"test3",
-"vore",
-"recording test"
-]
-
 class SaveCallback(callbacks.Callback):
 
-    def __init__(self, save_weights, save_samples, cp_distance, test_samples):
+    def __init__(self, save_weights, save_samples, cp_distance):
 
         super().__init__()
 
         self.save_weights = save_weights
         self.save_samples = save_samples
         self.checkpoint_distance = cp_distance
-        self.test_samples = test_samples
+        self.test_samples = get_files_names(os.path.join(TRAINING_PATH, "test"))
 
     def on_epoch_end(self, epoch, logs=None):
 
@@ -58,7 +52,7 @@ class SaveCallback(callbacks.Callback):
     def __save_sample(self, file_name, epoch):
 
         #Load file with librosa
-        input_path = os.path.join(WHISPERS_PATH, file_name + ".mp3")
+        input_path = os.path.join(TRAINING_PATH, "test", file_name + ".mp3")
         original_wave, sr = librosa.load(input_path, sr=SAMPLING_RATE)
 
         #Split in 1sec segments (22050 samples)
@@ -103,7 +97,7 @@ if __name__ == '__main__':
 
     dataset_loader = DatasetLoader()
 
-    save_callback = SaveCallback(SAVE_WEIGHTS, SAVE_SAMPLES, CHECKPOINTS_DISTANCE, TEST_SAMPLES)
+    save_callback = SaveCallback(SAVE_WEIGHTS, SAVE_SAMPLES, CHECKPOINTS_DISTANCE)
 
     history = model.fit(x=dataset_loader, callbacks=[save_callback], epochs=EPOCHS)
 

@@ -1,10 +1,13 @@
 import threading
 
+import os
 import random
 import librosa
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+
+from src.utils.file_manager import get_files_paths
 
 from src.config import *
 
@@ -14,8 +17,8 @@ class DatasetLoader(keras.utils.Sequence):
 
         print("Loading files...")
 
-        whispers_files = self.__get_files(WHISPERS_PATH)
-        screams_files = self.__get_files(SCREAMS_PATH)
+        whispers_files = get_files_paths(os.path.join(TRAINING_PATH, "train"))
+        screams_files = get_files_paths(SCREAMS_PATH)
 
         self.whispers = [self.__load_audio(whisper_file) for whisper_file in whispers_files]
         self.screams = [self.__load_audio(scream_file) for scream_file in screams_files]
@@ -57,16 +60,6 @@ class DatasetLoader(keras.utils.Sequence):
 
         batch_whispers.append(self.__load_segment(whisper_audio))
         batch_screams.append(self.__load_segment(scream_audio))
-
-    def __get_files(self, root):
-
-        paths = []
-
-        for dirname, dirnames, filenames in os.walk(root):
-            for filename in filenames:
-                paths.append(os.path.join(dirname, filename))
-
-        return paths
 
     def __load_audio(self, audio_file):
 

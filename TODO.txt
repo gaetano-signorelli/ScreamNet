@@ -1,49 +1,14 @@
-1.Adjust scripts and files V
-  -Rebuild scream dataset removing silences V
-  -Edit config V
-  -Remove preprocess V
-
-2. Implement Generator V
-  -Same architecture of MelGAN V
-  -Use Kapre to get Mel V
-  -Input and Output = 22050 samples (1 second) V
-  -[Try with weight normalization] V
-
-3. Implement Discriminator(s) V
-  -Same architecture of MelGAN V
-  -Unbounded score as output of each discriminator V
-  -[Try with weight normalization] V
-
-4. Implement Loader V
-  -Use librosa to load data when needed V
-  -Load BATCH_SIZE random 1 second segments (Window-based) V
-  -Pad if necessary V
-  -Load both whispers for generation and screams for discrimination V
-  -[Try remove silences whispers]
-  -[Try with librosa's normalization] V
-  -[Try with amplitude augmenting]
-  -[Try to add Gaussian noise]
-
-5. Implement Train loop V
-  -Train generator and discriminator asynchronously at each train step V
-  -Use main losses from MelGAN V
-  -Use correlation loss ([try with correlation between mels, or other losses, if needed]) V
-  -Pass all generated samples to the discriminator, as well as a same number of screams V
-
-6. Training V
-  -Implement Trainer V
-  -Save weights checkpoints V
-  -Save samples of tests V
-
-7. Test V
-  -Fix compile errors V
-  -Fix runtime errors V
-  -Run trainings and fix until it works V
-  -[It may be necessary to train using more recordings and with different speakers]
-
-8. Refinements V
-  -Make weight normalization work V
-  -Add preprocessing normalization in network V
-  -Run TFLite conversion V
-
-9. Implement on Android Studio
+- Re-organize datasets V
+- Build dataset with edited whispers and train
+- Build dataset with vocal from songs and train
+- Build dataset with normal talks and train
+- (If previous training work) Build mixed dataset
+- (If previous mixed training works) Build new tflite model for the app
+- (If previous training work separately) Build many tflite models with possibility for choosing in app
+- Remove trailing 0s in Screamify before saving
+- Load Screamify app to a private(?) repository on Github + App download
+- Edit audio_to_scream.py to pass arguments: input file, weights name
+- Upload weights on Cloud and add link to repository
+- Compile ReadMe(s) + Copyrights + Examples
+- Make repository public
+- Delete useless folders from "Data"

@@ -15,7 +15,7 @@ from src.model.gan import ScreamGAN
 from src.config import *
 
 RANDOM_SEED = 24
-COMPLETED = 50
+COMPLETED = 0
 
 SAVE_WEIGHTS = True
 SAVE_SAMPLES = True
@@ -103,3 +103,5 @@ if __name__ == '__main__':
 
     if SAVE_WEIGHTS:
         model.save_weights(WEIGHTS_PATH)
+
+    print("Train completed!")

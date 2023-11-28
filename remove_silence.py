@@ -1,12 +1,19 @@
 import os
+import argparse
 import numpy as np
 from tqdm import tqdm
 
 from src.utils.audio_preprocessing import AudioFile
 
-INPUT_PATH = os.path.join("data","GTZAN","Vocals")
+def parse_arguments():
 
-OUTPUT_PATH = os.path.join("data","GTZAN","Vocals no silence")
+    parser = argparse.ArgumentParser(description='Remove silence')
+    parser.add_argument('input_path', type=str, help='Location of the audio files')
+    parser.add_argument('output_path', type=str, help='Location for saving the output files')
+
+    args = parser.parse_args()
+
+    return args
 
 def get_audio_paths(root):
 
@@ -22,12 +29,16 @@ def get_audio_paths(root):
 
 if __name__ == '__main__':
 
-    if not os.path.exists(OUTPUT_PATH):
-        os.mkdir(OUTPUT_PATH)
+    args = parse_arguments()
 
-    path_files, path_names = get_audio_paths(INPUT_PATH)
+    if not os.path.exists(args.output_path):
+        os.mkdir(args.output_path)
+
+    path_files, path_names = get_audio_paths(args.input_path)
 
     for path_file, path_name in tqdm(zip(path_files, path_names)):
         audio_file = AudioFile(path_file, path_name)
         audio_file.preprocess()
-        audio_file.save(OUTPUT_PATH)
+        audio_file.save(args.output_path)
+
+    print("Files saved in: " + args.output_path)

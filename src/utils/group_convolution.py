@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# This code is copy from https://github.com/tensorflow/tensorflow/pull/36773.
+# This code is a copy from https://github.com/tensorflow/tensorflow/pull/36773.
 """Group Convolution Modules."""
 
 from tensorflow.python.framework import tensor_shape

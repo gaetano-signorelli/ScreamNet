@@ -32,12 +32,6 @@ class TFConvTranspose1d(layers.Layer):
 
     @tf.function
     def call(self, x):
-        """Calculate forward propagation.
-        Args:
-            x (Tensor): Input tensor (B, T, C).
-        Returns:
-            Tensor: Output tensor (B, T', C').
-        """
 
         x = tf.expand_dims(x, axis=2)
         x = self.conv1d_transpose(x)

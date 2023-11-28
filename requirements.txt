@@ -1,0 +1,6 @@
+tensorflow==2.8.0
+numpy==1.24.3
+librosa==0.10.0
+soundfile==0.12.1
+tqdm==4.64.1
+kapre==0.3.7

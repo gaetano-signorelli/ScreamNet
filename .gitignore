@@ -1,6 +1,9 @@
-data
-results/train samples
-weights
+data/Full songs tests
+data/GTZAN
+data/Metal
+data/Whispers
+data/Dataset/Screams/*.mp3
+weights/Vocals/*.data*
 
 __pycache__
 *.pyc

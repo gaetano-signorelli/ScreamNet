@@ -1,4 +1,5 @@
 import os
+import argparse
 import librosa
 import numpy as np
 import tqdm as tqdm
@@ -9,14 +10,33 @@ from src.model.gan import ScreamGAN
 
 from src.config import *
 
-FILE = "it works"
-PATH = os.path.join("data","Whispers", FILE + ".mp3")
-RESULT_PATH = os.path.join(RESULTS_PATH, FILE + ".mp3")
+NORMALIZE = False
+
+def parse_arguments():
+
+    parser = argparse.ArgumentParser(description='Voice to scream')
+    parser.add_argument('input_path', type=str, help='Path to the input voice')
+
+    args = parser.parse_args()
+
+    return args
+
+def normalize(wave, target_db=-1.0):
+
+    target_peak = np.power(10, target_db / 20)
+    current_peak = np.max(target_peak)
+    gain = target_peak / current_peak
+    normalized_wave = wave * gain
+
+    return normalized_wave
 
 def screamify(model, input_path, output_path):
 
     #Load file with librosa
-    original_wave, sr = librosa.load(input_path, sr=SAMPLING_RATE)
+    original_wave, sr = librosa.load(input_path, sr=SAMPLING_RATE, res_type='soxr_lq')
+
+    if NORMALIZE:
+        original_wave = normalize(original_wave)
 
     #Split in 1sec segments (22050 samples)
     diff = SEGMENT_LENGTH - (original_wave.shape[0] % SEGMENT_LENGTH)
@@ -28,15 +48,21 @@ def screamify(model, input_path, output_path):
     #Predict (transform to screams)
     results = model.generator.predict(batch)
 
-    #Concatenate (flatten)
+    #Concatenate (flatten) and remove padding
     scream = np.concatenate(results)
+    scream = scream[:-diff]
 
     #Save
     sf.write(output_path, scream, SAMPLING_RATE, format="mp3")
 
+    print("Result saved in: " + output_path)
     print("Conversion completed!")
 
 if __name__ == '__main__':
+
+    args = parse_arguments()
+    name = os.path.basename(args.input_path).split(".")[0]
+    output_path = os.path.join(RESULTS_PATH, name + "_scream.mp3")
 
     input_shape = (SEGMENT_LENGTH)
     warmup_input = Input(shape=input_shape)
@@ -52,4 +78,4 @@ if __name__ == '__main__':
     else:
         raise Exception("GAN's weights not found.")
 
-    screamify(gan, PATH, RESULT_PATH)
+    screamify(gan, args.input_path, output_path)

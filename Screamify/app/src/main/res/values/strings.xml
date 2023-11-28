@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Screamify</string>
+    <string name="main_button_text">Record</string>
+    <string name="save_dialog_title">Save recording</string>
+    <string name="save_dialog_yes">Save</string>
+    <string name="save_dialog_no">Cancel</string>
+    <string name="progress_dialog_title">Saving recording...</string>
+</resources>

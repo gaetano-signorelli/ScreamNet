@@ -69,7 +69,7 @@ Both datasets (Vocals and Screams) will have to be specified (it is also possibl
 ## App
 
 This AI system has been designed so to be extremely fast (it also implements mixed precision), light and capable of working at a speed that allows it to be used for realtime applications and in mobile devices.<br>
-To test these abilities, an Android application has been released, allowing to exploit the integrated microphone in mobile devices to transform users' voices (even in realtime), for fun or musical experiments. The source code of this app (developed with Android Studio), is placed inside the *Screamify* folder; it can be built from there, or the apk can be directly accessed through the *Release* of this repository.
+To test these abilities, an Android application has been released, allowing to exploit the integrated microphone in mobile devices to transform users' voices (even in realtime), for fun or musical experiments. The source code of this app (developed with *Android Studio*), is placed inside the *Screamify* folder; it can be built from there, or the apk can be directly accessed through the *Releases* of this repository.
 
 Moreover, a new trained model can be directly converted into a tflite model by running the command:
 
